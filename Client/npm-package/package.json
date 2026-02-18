@@ -1,0 +1,34 @@
+{
+    "name": "@shoebsd31/document-intelligence",
+    "version": "0.0.1",
+    "description": "Document Intelligence labeling web component built with Angular Elements. A self-contained <document-intelligence> custom element for document labeling UX.",
+    "license": "MIT",
+    "author": "shoebsd31",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/shoebsd31/form-recognizer-toolkit-angular.git"
+    },
+    "homepage": "https://github.com/shoebsd31/form-recognizer-toolkit-angular#readme",
+    "keywords": [
+        "document-intelligence",
+        "form-recognizer",
+        "labeling",
+        "web-component",
+        "custom-element",
+        "angular-elements"
+    ],
+    "files": [
+        "main.js",
+        "polyfills.js",
+        "styles.css",
+        "chunk-*.js",
+        "media/**",
+        "assets/**",
+        "3rdpartylicenses.txt",
+        "README.md",
+        "LICENSE"
+    ],
+    "main": "main.js",
+    "unpkg": "main.js",
+    "jsdelivr": "main.js"
+}

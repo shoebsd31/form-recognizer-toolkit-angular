@@ -7,7 +7,11 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build:element": "ng run client-angular:build-element"
+    "build:element": "ng run client-angular:build-element",
+    "package:prepare": "node scripts/prepare-package.js",
+    "package:build": "npm run build:element && npm run package:prepare",
+    "package:publish": "npm run package:build && cd dist/npm-package && npm publish --access public",
+    "package:publish:dry": "npm run package:build && cd dist/npm-package && npm publish --access public --dry-run"
   },
   "private": true,
   "dependencies": {
