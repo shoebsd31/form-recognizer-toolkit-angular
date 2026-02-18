@@ -1,0 +1,26 @@
+<div class="app-container">
+    <header class="app-header">
+        <h1>Document Intelligence - Sample App</h1>
+        <div class="controls">
+            <label>
+                <input type="checkbox" [(ngModel)]="allowTable" />
+                Allow Table
+            </label>
+            <label>
+                <input type="checkbox" [(ngModel)]="allowDrawRegion" />
+                Allow Draw Region
+            </label>
+            <label>
+                <input type="checkbox" [(ngModel)]="allowAddFields" />
+                Allow Add Fields
+            </label>
+        </div>
+    </header>
+    <main class="app-main">
+        <document-intelligence
+            [allowTable]="allowTable"
+            [allowDrawRegion]="allowDrawRegion"
+            [allowAddFields]="allowAddFields"
+        ></document-intelligence>
+    </main>
+</div>

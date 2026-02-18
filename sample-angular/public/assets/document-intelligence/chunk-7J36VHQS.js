@@ -1,0 +1,1 @@
+import{e as a,i as n}from"./chunk-YBLWIXBV.js";var l,c,i=a(()=>{"use strict";l=e=>new Promise((t,r)=>{e.toBlob(o=>{o?t(o):r("Failed to create blob for canvas.")})}),c=e=>n(null,null,function*(){return yield fetch(e).then(t=>t.arrayBuffer())})});export{l as a,c as b,i as c};
