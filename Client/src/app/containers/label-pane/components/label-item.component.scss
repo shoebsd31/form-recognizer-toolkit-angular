@@ -1,0 +1,138 @@
+@use "../../../../styles/fluent-variables" as *;
+
+.label-item {
+    padding: 5px 8px;
+    color: $ms-color-gray130;
+
+    &:hover {
+        cursor: pointer;
+        background-color: $ms-color-gray20;
+    }
+
+    .label-item-entry {
+        display: grid;
+        grid-template-columns: 24px 24px 1fr 24px;
+        align-items: center;
+        position: relative;
+    }
+
+    .label-item-result {
+        display: grid;
+        grid-template-columns: 24px 1fr 24px;
+        align-items: center;
+    }
+
+    .label-item-value {
+        padding: 6px 0;
+        cursor: pointer;
+
+        .label-item-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+    }
+
+    .label-item-icon {
+        font-size: 16px;
+    }
+
+    .selection-mark-value {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .no-select {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .drag-handle {
+        cursor: grab;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .field-name {
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .rename-input {
+        height: 24px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .rename-error {
+        color: #a4262c;
+        font-size: 12px;
+        grid-column: 3;
+    }
+
+    .menu-button {
+        width: 24px;
+        height: 24px;
+    }
+
+    .delete-label-button {
+        width: 24px;
+        height: 24px;
+    }
+
+    .context-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999;
+    }
+
+    .context-menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: $ms-color-white;
+        border: 1px solid $ms-color-gray30;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 160px;
+        padding: 4px 0;
+    }
+
+    .context-menu-item {
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            background-color: $ms-color-gray20;
+        }
+
+        &.active {
+            font-weight: 600;
+        }
+    }
+
+    .context-menu-separator {
+        height: 1px;
+        background-color: $ms-color-gray30;
+        margin: 4px 0;
+    }
+
+    .context-menu-label {
+        padding: 4px 12px;
+        font-size: 12px;
+        color: $ms-color-gray110;
+        font-weight: 600;
+    }
+}

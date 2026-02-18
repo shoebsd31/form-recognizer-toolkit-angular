@@ -1,0 +1,114 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.label-canvas {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+
+    .label-canvas-command-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 44px;
+        padding: 0 24px;
+        border-bottom: 1px solid #edebe9;
+        flex-shrink: 0;
+
+        .draw-region-button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border: 1px solid #8a8886;
+            border-radius: 2px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            color: #323130;
+
+            &:hover {
+                background: #f3f2f1;
+            }
+
+            &.active {
+                background: #edebe9;
+                border-color: #0078d4;
+                color: #0078d4;
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    .label-canvas-control-bar {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        height: 44px;
+        border-top: 1px solid #edebe9;
+        padding: 0 24px;
+        flex-shrink: 0;
+
+        .label-canvas-page-control {
+            grid-column-start: 2;
+        }
+
+        .label-canvas-tool-bar {
+            display: flex;
+            margin-left: auto;
+        }
+    }
+
+    .label-canvas-image-map {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        overflow: hidden;
+
+        .label-canvas-overlay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.9);
+            height: 100%;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .table-icon-tooltip {
+            position: absolute;
+            cursor: pointer;
+            z-index: 5;
+
+            .tooltip-container {
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+
+    .delete-region-icon {
+        position: fixed;
+        cursor: pointer;
+        color: #a4262c;
+        font-size: 16px;
+        z-index: 100;
+        padding: 2px;
+
+        &:hover {
+            color: #d13438;
+        }
+    }
+}

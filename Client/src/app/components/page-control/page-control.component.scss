@@ -1,0 +1,38 @@
+.page-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .page-number {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .current-page input {
+            border: 1px solid #c8c6c4;
+            border-radius: 2px;
+            padding: 4px;
+            font-size: 14px;
+            outline: none;
+
+            &:focus {
+                border-color: #0078d4;
+            }
+
+            &:disabled {
+                background-color: #f3f2f1;
+            }
+        }
+
+        .total-page {
+            font-size: 14px;
+            white-space: nowrap;
+        }
+    }
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

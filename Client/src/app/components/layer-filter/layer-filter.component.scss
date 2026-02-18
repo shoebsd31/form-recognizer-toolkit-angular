@@ -1,0 +1,62 @@
+:host {
+    display: inline-block;
+}
+
+.layer-filter-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    color: #605e5c;
+    font-size: 16px;
+
+    &:hover {
+        background-color: #f3f2f1;
+    }
+
+    &:disabled {
+        color: #a19f9d;
+        background-color: transparent;
+        cursor: default;
+    }
+}
+
+.layer-filter-menu {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 1000;
+    background: #fff;
+    box-shadow: 0 3.2px 7.2px 0 rgba(0, 0, 0, 0.132), 0 0.6px 1.8px 0 rgba(0, 0, 0, 0.108);
+    border-radius: 2px;
+    min-width: 180px;
+}
+
+.layer-filter-title {
+    background: transparent;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px;
+    border-bottom: 1px solid #edebe9;
+}
+
+.layer-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+        background-color: #f3f2f1;
+    }
+
+    label {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+}

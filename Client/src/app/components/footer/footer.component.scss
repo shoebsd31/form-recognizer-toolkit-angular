@@ -1,0 +1,16 @@
+@use "../../../styles/fluent-variables" as *;
+
+.footer-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 20px;
+    height: 30px;
+    border-top: 1px solid $ms-color-gray30;
+
+    .copyright-year {
+        margin: 0;
+        font-size: 12px;
+        color: $ms-color-gray110;
+    }
+}

@@ -1,0 +1,62 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.custom-doc-label-page {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0 20px;
+    overflow: hidden;
+
+    .label-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0 15px;
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+    }
+
+    .label-page-main {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        border-top: 1px solid #edebe9;
+        overflow: hidden;
+
+        .label-page-gallery {
+            flex: 0 0 180px;
+            overflow-y: auto;
+        }
+
+        .split-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .label-page-canvas {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border-left: 1px solid #edebe9;
+            border-right: 1px solid #edebe9;
+            overflow: hidden;
+        }
+
+        .label-page-pane {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+    }
+}

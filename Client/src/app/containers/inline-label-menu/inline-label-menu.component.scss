@@ -1,0 +1,77 @@
+:host {
+    display: block;
+}
+
+.inline-label-menu-container {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    max-height: 180px;
+    background: #ffffff;
+    box-shadow: 0 6.4px 14.4px rgba(0, 0, 0, 0.132),
+        0 1.2px 3.6px rgba(0, 0, 0, 0.108);
+    border-radius: 2px;
+    z-index: 1000;
+
+    .inline-label-menu-input {
+        padding: 6px;
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 4px 8px;
+            border: 1px solid #8a8886;
+            border-radius: 2px;
+            outline: none;
+            font-size: 14px;
+
+            &:focus {
+                border-color: #0078d4;
+            }
+        }
+    }
+
+    .inline-label-menu-list {
+        overflow: auto;
+        flex: 1;
+
+        .inline-label-menu-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            &:hover {
+                background-color: #f3f2f1;
+            }
+
+            .field-color-icon {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                margin-right: 8px;
+                flex-shrink: 0;
+            }
+
+            .create-field-icon {
+                margin-right: 8px;
+                color: #605e5c;
+                flex-shrink: 0;
+            }
+
+            .field-name {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+}

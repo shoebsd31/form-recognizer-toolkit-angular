@@ -1,0 +1,107 @@
+@use "styles/fluent-variables" as *;
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    color: $ms-color-gray190;
+    overflow: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Button utilities */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #323130;
+    font-size: 16px;
+
+    &:hover {
+        background-color: #f3f2f1;
+    }
+
+    &:disabled {
+        color: #a19f9d;
+        cursor: default;
+        background: transparent;
+    }
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: #0078d4;
+    color: white;
+    border: 1px solid #0078d4;
+    border-radius: 4px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+        background-color: #106ebe;
+    }
+
+    &:disabled {
+        background-color: #f3f2f1;
+        color: #a19f9d;
+        border-color: #f3f2f1;
+        cursor: default;
+    }
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: white;
+    color: #323130;
+    border: 1px solid #8a8886;
+    border-radius: 4px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+        background-color: #f3f2f1;
+    }
+}
+
+/* Input utilities */
+.input-text {
+    padding: 6px 8px;
+    border: 1px solid #8a8886;
+    border-radius: 2px;
+    font-size: 14px;
+    outline: none;
+
+    &:focus {
+        border-color: #0078d4;
+    }
+}

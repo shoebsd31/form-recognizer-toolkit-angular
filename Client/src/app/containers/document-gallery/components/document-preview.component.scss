@@ -1,0 +1,115 @@
+:host {
+    display: block;
+}
+
+.document-card {
+    position: relative;
+    height: 124px;
+    min-width: 124px;
+    width: 124px;
+    border-radius: 2px;
+    box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108);
+    box-sizing: border-box;
+    margin-left: 16px;
+    margin-right: auto;
+    cursor: pointer;
+    background: #fff;
+
+    &:focus {
+        outline: 1px solid #605e5c;
+    }
+
+    &.selected {
+        border: 1px solid #000;
+    }
+}
+
+.document-card-image {
+    height: 100px;
+    width: 100%;
+    object-fit: contain;
+    display: block;
+    background-color: #faf9f8;
+}
+
+.document-card-image-placeholder {
+    height: 100px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #faf9f8;
+    color: #a19f9d;
+    font-size: 24px;
+}
+
+.document-card-details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+}
+
+.document-card-title {
+    font-size: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    height: 20px;
+    line-height: 20px;
+    width: 110px;
+    padding: 0;
+    text-align: center;
+}
+
+.documentcard-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    height: 100px;
+    width: 100%;
+    background: rgba(243, 242, 241, 0.8);
+}
+
+.analyze-spinner {
+    font-size: 14px;
+}
+
+.documentcard-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 7px;
+    margin-right: 4px;
+}
+
+.badge-labeled {
+    color: #6c179a;
+    font-size: 14px;
+}
+
+.badge-analyzed {
+    color: #0f703b;
+    font-size: 14px;
+}
+
+.documentcard-delete-icon {
+    position: absolute;
+    bottom: 24px;
+    right: 0;
+    margin-right: 3px;
+    color: #605e5c;
+    font-size: 20px;
+    padding: 4px;
+    border-radius: 4px 0 0 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    border: none;
+    line-height: 1;
+
+    &:hover {
+        color: #0078d4;
+    }
+}
