@@ -486,3 +486,165 @@ You can get the `ocr.json` file for your document with two approaches:
 After getting `ocr.json` file for your document, **it is important to rename the file with the naming convention in order for Labeling UX to correctly connect your document with its corresponding `ocr.json` file**.
 
 The naming convention for `ocr.json` file is **`<document name>.<document extension>.ocr.json`**. For example, the name of `ocr.json` file for document named **`invoiceA.pdf`** should be **`invoiceA.pdf.ocr.json`**
+
+---
+
+## Server-Side API Requirements for the Web Component
+
+When using the `<document-intelligence>` web component in your own Angular application, your backend must implement the following REST API endpoints. The component expects these endpoints to be available under a `/files` base path relative to the `serverUrl` you configure on the component.
+
+> **Note:** You do not need to use the included Express server. Any backend (Node.js, .NET, Java, Python, etc.) that implements the API contract below will work.
+
+### Connecting the Component to Your Backend
+
+The component has a `serverUrl` input that controls where API requests are sent. You have two options:
+
+#### Option 1: Set `serverUrl` to your backend URL (Recommended)
+
+Pass the full URL of your backend server directly to the component:
+
+```html
+<document-intelligence serverUrl="http://localhost:4000"></document-intelligence>
+```
+
+With this approach, all API calls are made directly to `http://localhost:4000/files/...`. **No proxy configuration is needed.** Your backend must have CORS enabled to allow requests from your Angular application's origin.
+
+#### Option 2: Leave `serverUrl` empty and use a proxy
+
+If `serverUrl` is not set (or set to `""`), the component makes **relative** API calls (e.g., `/files/...`). These requests go to the same origin as your Angular application. In this case, you need to proxy `/files` requests to your backend.
+
+For Angular CLI, create a `proxy.conf.json`:
+
+```json
+{
+    "/files": {
+        "target": "http://localhost:4000",
+        "secure": false,
+        "changeOrigin": true
+    }
+}
+```
+
+And reference it in `angular.json` under `serve > options > proxyConfig`, or pass it via the CLI:
+
+```sh
+ng serve --proxy-config proxy.conf.json
+```
+
+> **In production**, you would typically configure your web server (Nginx, Apache, etc.) or API gateway to route `/files` requests to your backend instead of using the Angular dev proxy.
+
+### API Endpoints
+
+#### 1. `GET /` — Health Check
+
+**Purpose:** The component calls this on initialization to verify that the server is reachable and responsive.
+
+**What your server should do:**
+- Return a simple JSON response indicating the server is running.
+
+**Expected Response:**
+
+| Status | Body |
+|--------|------|
+| `200 OK` | `{ "success": true }` |
+
+---
+
+#### 2. `GET /files` — List All Files
+
+**Purpose:** The component calls this to discover all available documents, OCR data files, label files, and field definition files in the data store. It uses the returned filenames to determine which documents are available for labeling and to locate associated `.ocr.json` and `.labels.json` files.
+
+**What your server should do:**
+- Return a JSON array of all filenames (strings) available in your document storage.
+- The list should include documents (PDF, JPG, PNG, TIFF, etc.), their corresponding `.ocr.json` files, any `.labels.json` files, and the `fields.json` file if it exists.
+
+**Expected Response:**
+
+| Status | Body |
+|--------|------|
+| `200 OK` | `["invoice1.pdf", "invoice1.pdf.ocr.json", "invoice1.pdf.labels.json", "receipt.jpg", "receipt.jpg.ocr.json", "fields.json"]` |
+
+---
+
+#### 3. `GET /files/:filename` — Read a File
+
+**Purpose:** The component calls this to read individual files. It is used for multiple purposes:
+- **Loading documents** (PDF, JPG, PNG, TIFF) — the response is consumed as binary (`ArrayBuffer`) to render the document on the canvas.
+- **Loading OCR data** (`<document>.ocr.json`) — the response is parsed as JSON containing the Azure Document Intelligence analyze result, which provides word bounding boxes, tables, and selection marks for the labeling overlay.
+- **Loading labels** (`<document>.labels.json`) — the response is parsed as JSON containing previously saved label assignments for the document.
+- **Loading field definitions** (`fields.json`) — the response is parsed as JSON containing the field/label key definitions shared across all documents.
+- **Checking file existence** — the component also calls this endpoint to check if a file exists (e.g., to determine if OCR data is available for a document). A `404` response indicates the file does not exist.
+
+**What your server should do:**
+- Read the requested file from your storage and return its contents.
+- For binary files (PDF, images), return the raw file bytes.
+- For JSON files (`.ocr.json`, `.labels.json`, `fields.json`), return the JSON content.
+- If the file does not exist, return a `404` status.
+
+**Expected Response:**
+
+| Status | Body |
+|--------|------|
+| `200 OK` | File contents (binary or JSON depending on file type) |
+| `404 Not Found` | Error response (file does not exist) |
+
+---
+
+#### 4. `PUT /files/:filename` — Write/Update a File
+
+**Purpose:** The component calls this to save data back to the server. It is used for:
+- **Saving labels** (`<document>.labels.json`) — when the user assigns, updates, or deletes label values on a document, the component writes the updated labels JSON to the server.
+- **Saving field definitions** (`fields.json`) — when the user creates, renames, or deletes label keys (fields), the component writes the updated field definitions to the server.
+
+**What your server should do:**
+- Extract the `content` property from the JSON request body.
+- Write (create or overwrite) the file with the given filename using the provided content.
+- Return a success response.
+
+**Request Body:**
+```json
+{
+  "content": "<file content as a string>"
+}
+```
+
+**Expected Response:**
+
+| Status | Body |
+|--------|------|
+| `201 Created` | `{ "success": true }` |
+
+---
+
+#### 5. `DELETE /files/:filename` — Delete a File
+
+**Purpose:** The component calls this when the user deletes a document from the document gallery. When a document is deleted, the component sends delete requests for the document file itself and its associated `.ocr.json` and `.labels.json` files.
+
+**What your server should do:**
+- Delete the specified file from your storage.
+- Return a `204 No Content` response on success.
+- If the file does not exist, return a `404` status (the component may send delete requests for associated files like `.labels.json` that might not exist — these 404s are handled gracefully).
+
+**Expected Response:**
+
+| Status | Body |
+|--------|------|
+| `204 No Content` | *(empty)* |
+| `404 Not Found` | Error response (file does not exist) |
+
+---
+
+### File Naming Conventions
+
+The component relies on strict file naming conventions to associate documents with their data:
+
+| File | Naming Pattern | Example |
+|------|---------------|---------|
+| Document | `<name>.<ext>` | `invoice.pdf` |
+| OCR data | `<name>.<ext>.ocr.json` | `invoice.pdf.ocr.json` |
+| Labels | `<name>.<ext>.labels.json` | `invoice.pdf.labels.json` |
+| Field definitions | `fields.json` | `fields.json` |
+
+### Supported Document Types
+
+PDF, JPG, JPEG, PNG, TIFF, TIF
