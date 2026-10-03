@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import routesIndex from "./routes";
 import localFileStorage from "./routes/localFileStorage";
+import contentUnderstanding from "./routes/contentUnderstanding";
 import errorMiddleware from "./middlewares/errors";
 import cors from "cors";
 
@@ -19,6 +20,7 @@ app.use(
 );
 app.use("/", routesIndex);
 app.use("/files", localFileStorage);
+app.use("/cu", contentUnderstanding);
 
 // Middleware to handle errors
 app.use(errorMiddleware);

@@ -113,7 +113,16 @@ export class OcrLayerService implements OnDestroy {
             words.forEach((word) => {
                 const { content, polygon } = word;
                 textFeatures.push(
-                    this.createFeature(content, polygon, imageExtent, ocrExtent, pageNumber, FeatureCategory.Text)
+                    this.createFeature(
+                        content,
+                        polygon,
+                        imageExtent,
+                        ocrExtent,
+                        pageNumber,
+                        FeatureCategory.Text,
+                        undefined,
+                        (word as any).span
+                    )
                 );
             });
         }
@@ -247,7 +256,8 @@ export class OcrLayerService implements OnDestroy {
         ocrExtent: Extent,
         page: number,
         category: FeatureCategory,
-        fieldItem?: any
+        fieldItem?: any,
+        span?: { offset: number; length: number }
     ): Feature {
         const coordinates: number[][] = [];
         const polygonPoints: number[] = [];
@@ -275,6 +285,7 @@ export class OcrLayerService implements OnDestroy {
             highlighted: false,
             isOcrProposal: true,
             category,
+            span,
             [FIELD_PROPERTY]: fieldItem,
         });
         feature.setId(featureId);

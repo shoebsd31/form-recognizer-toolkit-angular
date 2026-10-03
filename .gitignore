@@ -5,18 +5,47 @@
 !Server/data/.gitkeep
 
 # dependencies
-/node_modules
+node_modules/
+
+# build output / caches
+dist/
+.angular/
+*.tsbuildinfo
 
 # production
 /build
+/out-tsc
+/coverage
 
 # misc
 .DS_Store
+
+# sample documents + analysis output (may contain personal/business data)
+/cu-upload/
+/cuf storage/*
+!/cuf storage/analyzer.json
+
+# env files (never commit secrets) — keep the checked-in sample
+.env
+*.env
+!sample.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# credentials / certificates / local settings
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+secrets.*
+*.local.json
+postman/*.local.*
+
+# logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

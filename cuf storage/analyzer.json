@@ -1,0 +1,147 @@
+{
+  "baseAnalyzerId": "prebuilt-document",
+  "config": {
+    "returnDetails": false,
+    "enableOcr": true,
+    "enableLayout": true,
+    "enableFormula": true,
+    "enableFigureDescription": false,
+    "enableFigureAnalysis": false,
+    "chartFormat": "chartjs",
+    "disableContentFiltering": true,
+    "tableFormat": "html",
+    "enableSegment": false,
+    "omitContent": false,
+    "segmentPerPage": false,
+    "enableAnnotations": true,
+    "annotationFormat": "markdown",
+    "_isHidden": false,
+    "_isEmbeddingModelRequired": false,
+    "_isRunnableAsIs": true
+  },
+  "fieldSchema": {
+    "name": "receipt-schema-1",
+    "description": "Receipts Schema",
+    "fields": {
+      "VendorName": {
+        "type": "string",
+        "method": "extract",
+        "description": "Name of vendor",
+        "estimateSourceAndConfidence": true
+      },
+      "VendorAddress": {
+        "type": "string",
+        "method": "extract",
+        "description": "Address of the vendor",
+        "estimateSourceAndConfidence": true
+      },
+      "InvoiceNumber": {
+        "type": "string",
+        "method": "extract",
+        "description": "Invoice Number",
+        "estimateSourceAndConfidence": true
+      },
+      "VendorTaxId": {
+        "type": "string",
+        "method": "extract",
+        "description": "VAT ID",
+        "estimateSourceAndConfidence": true
+      },
+      "VendorPhone": {
+        "type": "string",
+        "method": "extract",
+        "description": "Contact number of vendor",
+        "estimateSourceAndConfidence": true
+      },
+      "InvoiceTotal": {
+        "type": "string",
+        "method": "extract",
+        "description": "Total Amount of Invoice",
+        "estimateSourceAndConfidence": true
+      },
+      "InvoiceNetAmount": {
+        "type": "string",
+        "method": "extract",
+        "description": "Invoice net amount",
+        "estimateSourceAndConfidence": true
+      },
+      "InvoiceTaxAmount": {
+        "type": "string",
+        "method": "extract",
+        "description": "Total tax on the purchase",
+        "estimateSourceAndConfidence": true
+      },
+      "TimeOfPurchase": {
+        "type": "string",
+        "method": "extract",
+        "description": "time of purchase",
+        "estimateSourceAndConfidence": true
+      },
+      "DateOfPurchase": {
+        "type": "date",
+        "method": "extract",
+        "description": "date of purchase",
+        "estimateSourceAndConfidence": true
+      },
+      "PaymentType": {
+        "type": "string",
+        "method": "classify",
+        "description": "type pf payment",
+        "enum": [
+          "card",
+          "cashless"
+        ],
+        "enumDescriptions": {
+          "card": "payment done with card",
+          "cashless": "payment is contactless"
+        }
+      },
+      "Items": {
+        "type": "array",
+        "method": "generate",
+        "description": "items purchased",
+        "items": {
+          "type": "object",
+          "method": "generate",
+          "properties": {
+            "ItemName": {
+              "type": "string",
+              "method": "extract",
+              "description": "Name or Description of the item",
+              "estimateSourceAndConfidence": true
+            },
+            "Quantity": {
+              "type": "string",
+              "method": "extract",
+              "description": "total quantity",
+              "estimateSourceAndConfidence": true
+            },
+            "UnitPrice": {
+              "type": "string",
+              "method": "extract",
+              "description": "price of each unit",
+              "estimateSourceAndConfidence": true
+            },
+            "TotalPrice": {
+              "type": "string",
+              "method": "extract",
+              "description": "total price",
+              "estimateSourceAndConfidence": true
+            },
+            "Savings": {
+              "type": "string",
+              "method": "extract",
+              "description": "any discounted amount",
+              "estimateSourceAndConfidence": true
+            }
+          }
+        }
+      }
+    },
+    "definitions": {}
+  },
+  "warnings": [],
+  "status": "undefined",
+  "templateId": "prebuilt-documentAnalyzer",
+  "processingLocation": "geography"
+}

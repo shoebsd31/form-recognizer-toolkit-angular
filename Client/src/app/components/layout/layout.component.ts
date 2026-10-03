@@ -4,7 +4,6 @@ import { RouterOutlet } from "@angular/router";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { FooterComponent } from "../footer/footer.component";
 import { LoadingOverlayComponent } from "../loading-overlay/loading-overlay.component";
 import { selectLoadingOverlays } from "../../store/portal/portal.selectors";
 import { ILoadingOverlay } from "../../store/portal/portal.state";
@@ -12,7 +11,7 @@ import { ILoadingOverlay } from "../../store/portal/portal.state";
 @Component({
     selector: "app-layout",
     standalone: true,
-    imports: [CommonModule, RouterOutlet, FooterComponent, LoadingOverlayComponent],
+    imports: [CommonModule, RouterOutlet, LoadingOverlayComponent],
     template: `
         <div class="main" [attr.aria-busy]="isLoading$ | async" [attr.aria-hidden]="isLoading$ | async">
             <div role="status" class="sr-only">
@@ -22,7 +21,6 @@ import { ILoadingOverlay } from "../../store/portal/portal.state";
             <div class="page-container">
                 <router-outlet></router-outlet>
             </div>
-            <app-footer></app-footer>
         </div>
         <app-loading-overlay
             *ngIf="isLoading$ | async"

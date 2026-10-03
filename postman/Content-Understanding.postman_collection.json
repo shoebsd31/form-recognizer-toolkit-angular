@@ -1,0 +1,252 @@
+{
+  "info": {
+    "name": "Form Recognizer Toolkit - Content Understanding",
+    "description": "Tests the toolkit server's /cu endpoints (local) and the Azure AI Content Understanding REST API directly (GA 2025-11-01).\n\nSet variables in the companion environment file (Content-Understanding.postman_environment.json): baseUrl, cuEndpoint, cuKey, apiVersion, analyzerId.\n\nFor the binary 'analyze'/'test' requests: open the Body tab and select your file (e.g. testimg1.jpg) before sending — Postman can't store a file path portably.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "resultId", "value": "", "description": "Filled from an analyzeBinary response to GET its result." }
+  ],
+  "item": [
+    {
+      "name": "Local server (/cu)",
+      "description": "Endpoints exposed by the toolkit server (Server/routes/contentUnderstanding.ts).",
+      "item": [
+        {
+          "name": "Analyze (upload file) -> store <file>.result.json",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/octet-stream" }
+            ],
+            "body": { "mode": "file", "file": { "src": "" } },
+            "url": {
+              "raw": "{{baseUrl}}/cu/analyze/testimg1.jpg?analyzerId={{analyzerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "analyze", "testimg1.jpg"],
+              "query": [{ "key": "analyzerId", "value": "{{analyzerId}}" }]
+            },
+            "description": "Uploads the selected file bytes. The server analyzes it via Azure CU and writes CU_RESULTS_DIR/testimg1.jpg.result.json. Select a file in the Body tab first."
+          }
+        },
+        {
+          "name": "Analyze (by name, no body) -> store <file>.result.json",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cu/analyze/testimg1.jpg?analyzerId={{analyzerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "analyze", "testimg1.jpg"],
+              "query": [{ "key": "analyzerId", "value": "{{analyzerId}}" }]
+            },
+            "description": "No body: the server reads testimg1.jpg from CU_DATA_DIR (Server/data) and analyzes it."
+          }
+        },
+        {
+          "name": "Generate labels.json from result.json",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cu/labels/testimg1.jpg?analyzerId={{analyzerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "labels", "testimg1.jpg"],
+              "query": [{ "key": "analyzerId", "value": "{{analyzerId}}", "description": "Optional. Used to fetch the field schema (order + skipped fields). Falls back to the result's analyzerId / CU_ANALYZER_ID." }]
+            },
+            "description": "Reads <filename>.result.json and writes a CUF <filename>.labels.json beside it. No body required."
+          }
+        },
+        {
+          "name": "Generate labels (Studio trio, GUID-named)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cu/labels/testimg1.jpg?studio=true&analyzerId={{analyzerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "labels", "testimg1.jpg"],
+              "query": [
+                { "key": "studio", "value": "true" },
+                { "key": "analyzerId", "value": "{{analyzerId}}" }
+              ]
+            },
+            "description": "Writes a CU Studio-ready trio (<GUID>, <GUID>.labels.json, <GUID>.result.json) to CU_STUDIO_DIR. Upload all three to the labeling project's train/ prefix. Add &labelId=<guid> to reuse an existing document id."
+          }
+        },
+        {
+          "name": "Train (build) analyzer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseAnalyzerId\": \"prebuilt-documentAnalyzer\",\n  \"config\": {\n    \"returnDetails\": true,\n    \"enableOcr\": true,\n    \"enableLayout\": true,\n    \"estimateFieldSourceAndConfidence\": true\n  },\n  \"fieldSchema\": {\n    \"name\": \"receipt-schema\",\n    \"description\": \"Receipt fields\",\n    \"fields\": {\n      \"VendorName\": { \"type\": \"string\", \"method\": \"extract\", \"description\": \"Name of vendor\" },\n      \"InvoiceTotal\": { \"type\": \"string\", \"method\": \"extract\", \"description\": \"Total amount\" },\n      \"DateOfPurchase\": { \"type\": \"date\", \"method\": \"extract\", \"description\": \"Date of purchase\" }\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cu/analyzers/{{analyzerId}}/train",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "analyzers", "{{analyzerId}}", "train"]
+            },
+            "description": "Creates/builds the analyzer from the JSON definition and polls the build to completion."
+          }
+        },
+        {
+          "name": "Test analyzer (upload file, result NOT stored)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/octet-stream" }],
+            "body": { "mode": "file", "file": { "src": "" } },
+            "url": {
+              "raw": "{{baseUrl}}/cu/analyzers/{{analyzerId}}/test",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "analyzers", "{{analyzerId}}", "test"]
+            },
+            "description": "Analyzes the selected file with the analyzer and returns the result inline. Select a file in the Body tab first."
+          }
+        },
+        {
+          "name": "Get analyzer status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cu/analyzers/{{analyzerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "analyzers", "{{analyzerId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete analyzer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cu/analyzers/{{analyzerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cu", "analyzers", "{{analyzerId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Azure CU direct (debug auth)",
+      "description": "Calls the Azure endpoint directly with the subscription key — use these to isolate credential/network issues from the toolkit server.",
+      "item": [
+        {
+          "name": "Auth sanity: Document Intelligence list models",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Ocp-Apim-Subscription-Key", "value": "{{cuKey}}" }],
+            "url": {
+              "raw": "{{cuEndpoint}}/documentintelligence/documentModels?api-version=2024-11-30",
+              "host": ["{{cuEndpoint}}"],
+              "path": ["documentintelligence", "documentModels"],
+              "query": [{ "key": "api-version", "value": "2024-11-30" }]
+            },
+            "description": "A 200 here proves the key+endpoint and network access are good. A 401 identical to a no-key request means requests are blocked before key validation (firewall / public access disabled)."
+          }
+        },
+        {
+          "name": "CU list analyzers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Ocp-Apim-Subscription-Key", "value": "{{cuKey}}" }],
+            "url": {
+              "raw": "{{cuEndpoint}}/contentunderstanding/analyzers?api-version={{apiVersion}}",
+              "host": ["{{cuEndpoint}}"],
+              "path": ["contentunderstanding", "analyzers"],
+              "query": [{ "key": "api-version", "value": "{{apiVersion}}" }]
+            }
+          }
+        },
+        {
+          "name": "CU get prebuilt-documentAnalyzer",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Ocp-Apim-Subscription-Key", "value": "{{cuKey}}" }],
+            "url": {
+              "raw": "{{cuEndpoint}}/contentunderstanding/analyzers/prebuilt-documentAnalyzer?api-version={{apiVersion}}",
+              "host": ["{{cuEndpoint}}"],
+              "path": ["contentunderstanding", "analyzers", "prebuilt-documentAnalyzer"],
+              "query": [{ "key": "api-version", "value": "{{apiVersion}}" }]
+            }
+          }
+        },
+        {
+          "name": "CU create/replace analyzer (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Ocp-Apim-Subscription-Key", "value": "{{cuKey}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"baseAnalyzerId\": \"prebuilt-documentAnalyzer\",\n  \"config\": { \"enableOcr\": true, \"enableLayout\": true, \"estimateFieldSourceAndConfidence\": true },\n  \"fieldSchema\": {\n    \"name\": \"receipt-schema\",\n    \"fields\": {\n      \"VendorName\": { \"type\": \"string\", \"method\": \"extract\" },\n      \"InvoiceTotal\": { \"type\": \"string\", \"method\": \"extract\" }\n    }\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{cuEndpoint}}/contentunderstanding/analyzers/{{analyzerId}}?api-version={{apiVersion}}",
+              "host": ["{{cuEndpoint}}"],
+              "path": ["contentunderstanding", "analyzers", "{{analyzerId}}"],
+              "query": [{ "key": "api-version", "value": "{{apiVersion}}" }]
+            },
+            "description": "Returns 201 with an Operation-Location header. Poll that URL (GET with the key) until status is succeeded."
+          }
+        },
+        {
+          "name": "CU analyze binary (upload file)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Capture the result id from the Operation-Location header for the next request.",
+                  "const loc = pm.response.headers.get('Operation-Location');",
+                  "if (loc) {",
+                  "  const m = loc.match(/analyzerResults\\/([^?]+)/);",
+                  "  if (m) { pm.collectionVariables.set('resultId', m[1]); console.log('resultId =', m[1]); }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Ocp-Apim-Subscription-Key", "value": "{{cuKey}}" },
+              { "key": "Content-Type", "value": "application/octet-stream" }
+            ],
+            "body": { "mode": "file", "file": { "src": "" } },
+            "url": {
+              "raw": "{{cuEndpoint}}/contentunderstanding/analyzers/{{analyzerId}}:analyzeBinary?api-version={{apiVersion}}",
+              "host": ["{{cuEndpoint}}"],
+              "path": ["contentunderstanding", "analyzers", "{{analyzerId}}:analyzeBinary"],
+              "query": [{ "key": "api-version", "value": "{{apiVersion}}" }]
+            },
+            "description": "Returns 202 + Operation-Location. The test script saves resultId; use 'CU get analyze result' next. Select a file in the Body tab first."
+          }
+        },
+        {
+          "name": "CU get analyze result",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Ocp-Apim-Subscription-Key", "value": "{{cuKey}}" }],
+            "url": {
+              "raw": "{{cuEndpoint}}/contentunderstanding/analyzerResults/{{resultId}}?api-version={{apiVersion}}",
+              "host": ["{{cuEndpoint}}"],
+              "path": ["contentunderstanding", "analyzerResults", "{{resultId}}"],
+              "query": [{ "key": "api-version", "value": "{{apiVersion}}" }]
+            },
+            "description": "Poll until status is Succeeded. resultId is set automatically by the analyzeBinary request's test script."
+          }
+        }
+      ]
+    }
+  ]
+}

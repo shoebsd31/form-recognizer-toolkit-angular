@@ -101,8 +101,8 @@ export const uniqueByKeepFirst = (array: any[], key: (item: any) => string) => {
 };
 
 export const makeLabelValue = (labelValueCandidate: LabelValueCandidate): LabelValue => {
-    const { page, text, boundingBoxes } = labelValueCandidate;
-    return { page, text, boundingBoxes };
+    const { page, text, boundingBoxes, spans } = labelValueCandidate;
+    return spans ? { page, text, boundingBoxes, spans } : { page, text, boundingBoxes };
 };
 
 export const getOrder = (currentOrders: { [key: string]: number }, orderId: string): number => {

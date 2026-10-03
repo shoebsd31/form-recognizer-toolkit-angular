@@ -16,6 +16,8 @@ import { SplitPaneSizes } from "../../models";
 import { IDocument, IRawDocument, DocumentStatus } from "../../store/documents/documents.types";
 import { isSupportedFile, getDocumentType } from "../../utils/document-loader";
 import { isLabelFieldWithCorrectFormat } from "../../utils/custom-model/schema-validation/fields-validator";
+import { parseLabelsFile, getPageDimsFromAnalyzeResult } from "../../utils/cuf-labels";
+import { CufPageDim } from "../../models/cuf-labels";
 import { LABELING_CONFIG, LabelingConfig } from "../../models/labeling-config";
 
 import {
@@ -392,10 +394,11 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
                 true
             );
             if (labels) {
+                const pageDims = await this.getPageDimsForDocument(this.currentDocument.name);
                 this.store.dispatch(
                     setLabelsByName({
                         name: this.currentDocument.name,
-                        labels: JSON.parse(labels).labels,
+                        labels: parseLabelsFile(labels, pageDims),
                     })
                 );
             } else {
@@ -410,14 +413,56 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Per-page pixel dimensions for a document, needed to convert CUF `source`
+     * (pixel polygons) into the internal normalized bounding boxes. Uses the
+     * already-loaded prediction, falling back to reading the Content Understanding
+     * result (*.result.json) and then the legacy OCR file (*.ocr.json).
+     */
+    private async getPageDimsForDocument(name: string): Promise<CufPageDim[]> {
+        let analyzeResult = this.predictions?.[name]?.analyzeResponse?.analyzeResult;
+        if (!analyzeResult) {
+            // Try the CU result first (its pages carry the dimensions), then the
+            // legacy OCR layout. getPageDimsFromAnalyzeResult handles both shapes.
+            for (const ext of [constants.resultFileExtension, constants.ocrFileExtension]) {
+                try {
+                    const raw = await this.storageProvider.readText(`${name}${ext}`, true);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        analyzeResult = parsed.result ?? parsed.analyzeResult ?? parsed;
+                        break;
+                    }
+                } catch {
+                    /* try next source */
+                }
+            }
+        }
+        return getPageDimsFromAnalyzeResult(analyzeResult);
+    }
+
     private async getAndSetOcr(): Promise<void> {
         if (!this.currentDocument) return;
 
         const { name } = this.currentDocument;
+        const resultFilePath = `${name}${constants.resultFileExtension}`;
         const ocrFilePath = `${name}${constants.ocrFileExtension}`;
 
         try {
-            if (await this.storageProvider.isFileExists(ocrFilePath, true)) {
+            // Prefer the Content Understanding result (*.result.json): its pages carry
+            // the OCR words used for the yellow word overlay. Fall back to the legacy
+            // layout (*.ocr.json) for documents that don't have a CU result yet.
+            if (await this.storageProvider.isFileExists(resultFilePath, true)) {
+                const rawResponse = await this.storageProvider.readText(resultFilePath, true);
+                if (rawResponse) {
+                    const parsed = JSON.parse(rawResponse);
+                    // The CU result nests the analyze output under `result`; the OCR layer
+                    // reads it via `analyzeResponse.analyzeResult`.
+                    const analyzeResult = parsed.result ?? parsed;
+                    this.store.dispatch(
+                        setDocumentPrediction({ name, analyzeResponse: { analyzeResult } as any })
+                    );
+                }
+            } else if (await this.storageProvider.isFileExists(ocrFilePath, true)) {
                 const rawResponse = await this.storageProvider.readText(ocrFilePath, true);
                 if (rawResponse) {
                     const layoutResponse = JSON.parse(rawResponse);

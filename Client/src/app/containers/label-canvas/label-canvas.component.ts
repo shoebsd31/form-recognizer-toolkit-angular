@@ -39,18 +39,6 @@ import { defaultStyler } from "../../utils/styler";
     template: `
         <div class="label-canvas">
             <div class="label-canvas-command-bar">
-                <button
-                    *ngIf="allowDrawRegion"
-                    class="draw-region-button"
-                    [class.active]="drawRegionMode"
-                    [disabled]="isButtonDisabled"
-                    (click)="handleDrawRegion()"
-                    title="Draw region"
-                    aria-label="Draw region"
-                >
-                    <i class="pi pi-stop"></i>
-                    <span>Draw region</span>
-                </button>
                 <app-layer-filter
                     [disabled]="isButtonDisabled"
                     [checkStates]="layerCheckStates"

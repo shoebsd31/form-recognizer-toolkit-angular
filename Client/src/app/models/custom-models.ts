@@ -1,5 +1,6 @@
 import { FeatureCategory } from "../components/image-map/contracts";
 import { Polygon } from "./analyze-result";
+import { CufSpan } from "./cuf-labels";
 
 export type CustomModel = {
     modelId: string;
@@ -80,6 +81,9 @@ export type LabelValue = {
     boundingBoxes: Polygon[];
     page: number;
     text: string;
+    // CUF grounding: character spans into the extracted content, carried through
+    // from OCR words so they can be written to the CUF `*.labels.json` file.
+    spans?: CufSpan[];
 };
 
 export type LabelValueCandidate = {
@@ -88,6 +92,8 @@ export type LabelValueCandidate = {
     text: string;
     category: FeatureCategory;
     alreadyAssignedLabelName?: string;
+    // CUF grounding span of the selected OCR word (when the candidate came from one).
+    spans?: CufSpan[];
 };
 
 export enum LabelType {

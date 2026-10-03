@@ -680,12 +680,14 @@ export class CustomModelLabelService implements OnDestroy {
     }
 
     private makeLabelValueCandidate(feature: Feature): LabelValueCandidate {
+        const span = feature.get("span");
         return {
             boundingBoxes: [getBoundingBoxFromFeatureId(feature.get("id"))] as any,
             page: this.currentDocument?.currentPage || 1,
             text: feature.get("text"),
             category: feature.get("category") || FeatureCategory.Text,
             alreadyAssignedLabelName: feature.get("alreadyAssignedLabelName"),
+            spans: span ? [span] : undefined,
         };
     }
 

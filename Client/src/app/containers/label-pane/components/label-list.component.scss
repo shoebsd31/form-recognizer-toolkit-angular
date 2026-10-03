@@ -28,9 +28,17 @@
 .cdk-drag-preview {
     box-sizing: border-box;
     border-radius: 4px;
+    overflow: hidden;
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14),
         0 3px 14px 2px rgba(0, 0, 0, 0.12);
     background: $ms-color-white;
+
+    // The separator is the first child of each draggable row. In the floating
+    // preview the row is detached from .label-list, so the <hr> reverts to the
+    // browser's default bulky rule and shows as a stray line on top. Hide it.
+    .item-separator {
+        display: none;
+    }
 }
 
 .cdk-drag-animating {
