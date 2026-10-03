@@ -1,24 +1,34 @@
-import { Component, Input } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { CustomModelLabelPageComponent } from "./containers/custom-model-label-page/custom-model-label-page.component";
+import { Component, Input } from '@angular/core';
+
+import { CustomModelLabelPageComponent } from './containers/custom-model-label-page/custom-model-label-page.component';
 
 @Component({
-    selector: "document-intelligence-wrapper",
-    standalone: true,
-    imports: [CommonModule, CustomModelLabelPageComponent],
-    template: `
-        <app-custom-model-label-page
-            [serverUrl]="serverUrl"
-            [allowTable]="allowTable"
-            [allowDrawRegion]="allowDrawRegion"
-            [allowAddFields]="allowAddFields"
-        ></app-custom-model-label-page>
+  selector: 'document-intelligence-wrapper',
+  standalone: true,
+  imports: [CustomModelLabelPageComponent],
+  template: `
+    <app-custom-model-label-page
+      [serverUrl]="serverUrl"
+      [allowTable]="allowTable"
+      [allowDrawRegion]="allowDrawRegion"
+      [allowAddFields]="allowAddFields"
+    ></app-custom-model-label-page>
+  `,
+  styles: [
+    `
+      :host {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
     `,
-    styles: [`:host { display: flex; flex-direction: column; width: 100%; height: 100%; overflow: hidden; }`],
+  ],
 })
 export class DocumentIntelligenceElement {
-    @Input() serverUrl: string = "";
-    @Input() allowTable: boolean = true;
-    @Input() allowDrawRegion: boolean = true;
-    @Input() allowAddFields: boolean = true;
+  @Input() serverUrl: string = '';
+  @Input() allowTable: boolean = true;
+  @Input() allowDrawRegion: boolean = true;
+  @Input() allowAddFields: boolean = true;
 }

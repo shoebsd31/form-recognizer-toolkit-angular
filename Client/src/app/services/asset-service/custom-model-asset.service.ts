@@ -11,6 +11,7 @@ import { selectPredictions } from "../../store/predictions/predictions.selectors
 import {
     internalToCufLabels,
     parseLabelsFile,
+    getConfidenceFromAnalyzeResult,
     getPageDimsFromAnalyzeResult,
     guessMimeType,
 } from "../../utils/cuf-labels";
@@ -37,7 +38,7 @@ export class CustomModelAssetService implements IAssetService {
     }
 
     /** Per-page pixel dimensions for a document, used to convert CUF `source` <-> boxes. */
-    private async getPageDims(documentName: string): Promise<CufPageDim[]> {
+    private async getAnalyzeResult(documentName: string): Promise<any> {
         let analyzeResult = this.predictions?.[documentName]?.analyzeResponse?.analyzeResult;
         if (!analyzeResult) {
             // Prefer the CU result (*.result.json), then the legacy OCR file.
@@ -54,7 +55,11 @@ export class CustomModelAssetService implements IAssetService {
                 }
             }
         }
-        return getPageDimsFromAnalyzeResult(analyzeResult);
+        return analyzeResult;
+    }
+
+    private async getPageDims(documentName: string): Promise<CufPageDim[]> {
+        return getPageDimsFromAnalyzeResult(await this.getAnalyzeResult(documentName));
     }
 
     async fetchAllDocumentLabels(labels: Labels, documents: IDocument[]): Promise<Labels> {
@@ -67,8 +72,12 @@ export class CustomModelAssetService implements IAssetService {
                     const labelFile = `${doc.name}${constants.labelFileExtension}`;
                     const rawLabels = await this.storageProvider.readText(labelFile, true);
                     if (rawLabels) {
-                        const pageDims = await this.getPageDims(doc.name);
-                        allLabels[doc.name] = parseLabelsFile(rawLabels, pageDims);
+                        const analyzeResult = await this.getAnalyzeResult(doc.name);
+                        allLabels[doc.name] = parseLabelsFile(
+                            rawLabels,
+                            getPageDimsFromAnalyzeResult(analyzeResult),
+                            getConfidenceFromAnalyzeResult(analyzeResult)
+                        );
                     } else {
                         allLabels[doc.name] = [];
                     }

@@ -84,6 +84,8 @@ export type LabelValue = {
     // CUF grounding: character spans into the extracted content, carried through
     // from OCR words so they can be written to the CUF `*.labels.json` file.
     spans?: CufSpan[];
+    // Analyzer confidence (0..1) from the Content Understanding result, display only.
+    confidence?: number;
 };
 
 export type LabelValueCandidate = {

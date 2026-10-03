@@ -12,6 +12,8 @@ export const constants = {
     // Azure AI Content Understanding labels schema — the format the toolkit now writes.
     cufLabelsSchema: "https://schema.ai.azure.com/mmi/2024-12-01-preview/labels.json",
     fieldsFile: "fields.json",
+    // CU analyzer definition; when present it drives the field list instead of fields.json.
+    analyzerFile: "analyzer.json",
     labelFileExtension: ".labels.json",
     ocrFileExtension: ".ocr.json",
     // Content Understanding analyzer output; the OCR word overlay is now drawn from this.

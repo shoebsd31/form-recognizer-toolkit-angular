@@ -377,7 +377,11 @@ export const internalToCufLabels = (params: InternalToCufParams): CufLabelsFile 
  * Returns undefined when there is no `source` (ungrounded/"skip" fields can't
  * be drawn on the canvas).
  */
-const cufFieldToValue = (cl: CufFieldLabel, pageDims: CufPageDim[]): LabelValue | undefined => {
+const cufFieldToValue = (
+    cl: CufFieldLabel,
+    pageDims: CufPageDim[],
+    confidence?: number
+): LabelValue | undefined => {
     if (!cl.source) return undefined;
     const { page, boundingBoxes } = parseSource(cl.source, pageDims);
     if (!boundingBoxes.length) return undefined;
@@ -387,11 +391,17 @@ const cufFieldToValue = (cl: CufFieldLabel, pageDims: CufPageDim[]): LabelValue 
         boundingBoxes: boundingBoxes as any,
     };
     if (cl.spans && cl.spans.length) value.spans = cl.spans;
+    const conf = confidence ?? cl.confidence;
+    if (conf !== undefined) value.confidence = conf;
     return value;
 };
 
 /** Convert a CUF labels file into the toolkit's internal labels. */
-export const cufToInternalLabels = (cufFile: CufLabelsFile, pageDims: CufPageDim[]): Label[] => {
+export const cufToInternalLabels = (
+    cufFile: CufLabelsFile,
+    pageDims: CufPageDim[],
+    confidences: ConfidenceMap = {}
+): Label[] => {
     const out: Label[] = [];
     const fieldLabels = cufFile.fieldLabels || {};
     for (const fieldName of Object.keys(fieldLabels)) {
@@ -401,7 +411,7 @@ export const cufToInternalLabels = (cufFile: CufLabelsFile, pageDims: CufPageDim
             cl.valueArray.forEach((row, rowIdx) => {
                 const vo = row.valueObject || {};
                 for (const prop of Object.keys(vo)) {
-                    const value = cufFieldToValue(vo[prop], pageDims);
+                    const value = cufFieldToValue(vo[prop], pageDims, confidences[`${fieldName}/${rowIdx}/${prop}`]);
                     if (value) {
                         out.push({ label: `${encName}/${rowIdx}/${encodeLabelString(prop)}`, value: [value] });
                     }
@@ -409,13 +419,13 @@ export const cufToInternalLabels = (cufFile: CufLabelsFile, pageDims: CufPageDim
             });
         } else if (cl.type === "object" && cl.valueObject) {
             for (const prop of Object.keys(cl.valueObject)) {
-                const value = cufFieldToValue(cl.valueObject[prop], pageDims);
+                const value = cufFieldToValue(cl.valueObject[prop], pageDims, confidences[`${fieldName}/${prop}`]);
                 if (value) {
                     out.push({ label: `${encName}/${encodeLabelString(prop)}`, value: [value] });
                 }
             }
         } else {
-            const value = cufFieldToValue(cl, pageDims);
+            const value = cufFieldToValue(cl, pageDims, confidences[fieldName]);
             if (value) out.push({ label: encName, value: [value] });
         }
     }
@@ -435,10 +445,27 @@ export const isCufLabelsFile = (parsed: any): boolean =>
  * Accepts both CUF (`fieldLabels`) and legacy FR (`labels[]`) files so existing
  * data keeps loading; the next save re-writes it in CUF format.
  */
-export const parseLabelsFile = (raw: string, pageDims: CufPageDim[]): Label[] => {
+export const parseLabelsFile = (raw: string, pageDims: CufPageDim[], confidences: ConfidenceMap = {}): Label[] => {
     const parsed = JSON.parse(raw);
-    if (isCufLabelsFile(parsed)) return cufToInternalLabels(parsed, pageDims);
+    if (isCufLabelsFile(parsed)) return cufToInternalLabels(parsed, pageDims, confidences);
     return (parsed && parsed.labels) || []; // legacy Form Recognizer format
+};
+
+/** Field confidence keyed by "Field", "Field/prop" or "Field/row/prop" (0..1). */
+export type ConfidenceMap = { [path: string]: number };
+
+/** Read per-field confidence from a Content Understanding result (`contents[0].fields`). */
+export const getConfidenceFromAnalyzeResult = (analyzeResult: any): ConfidenceMap => {
+    const out: ConfidenceMap = {};
+    const fields = analyzeResult?.contents?.[0]?.fields || {};
+    const visit = (path: string, f: any) => {
+        if (!f) return;
+        if (typeof f.confidence === "number") out[path] = f.confidence;
+        (f.valueArray || []).forEach((row: any, i: number) => visit(`${path}/${i}`, row));
+        for (const k of Object.keys(f.valueObject || {})) visit(`${path}/${k}`, f.valueObject[k]);
+    };
+    for (const name of Object.keys(fields)) visit(name, fields[name]);
+    return out;
 };
 
 /** Extract per-page pixel dimensions from an OCR/analyze result. */
