@@ -36,6 +36,7 @@ import {
   getPageDimsFromAnalyzeResult,
 } from '../../utils/cuf-labels';
 import { CufPageDim } from '../../models/cuf-labels';
+import { TrainingFlagService } from '../../services/training-flag.service';
 import { LABELING_CONFIG, LabelingConfig } from '../../models/labeling-config';
 
 import {
@@ -85,6 +86,20 @@ const LOADING_OVERLAY_NAME = 'customModelLabelPage';
         <h2 class="page-title" tabindex="0" aria-label="Label Page">
           Label Page
         </h2>
+        @if (currentDocument) {
+        <label
+          class="training-toggle"
+          title="Mark this document for classifier/analyzer training"
+        >
+          <input
+            type="checkbox"
+            [checked]="markedForTraining"
+            [disabled]="savingTrainingFlag"
+            (change)="toggleTraining($any($event.target).checked)"
+          />
+          Mark for training
+        </label>
+        }
       </div>
       <div class="label-page-main">
         <div class="label-page-gallery">
@@ -198,6 +213,8 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
   errorMessage: IStorageProviderError | undefined = undefined;
   splitPaneSizes: SplitPaneSizes = constants.defaultSplitPaneSizes;
   showEmptyFolderMessage: boolean = false;
+  markedForTraining: boolean = false;
+  savingTrainingFlag: boolean = false;
 
   // Store state
   labelError: { name: string; message: string } | null = null;
@@ -211,7 +228,8 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private storageProvider: StorageProviderService,
-    @Inject(LABELING_CONFIG) private config: LabelingConfig
+    @Inject(LABELING_CONFIG) private config: LabelingConfig,
+    private trainingFlag: TrainingFlagService
   ) {}
 
   get currentSplitSize(): number[] {
@@ -221,6 +239,7 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (this.serverUrl) this.storageProvider.setServerUrl(this.serverUrl);
     this.subscribeToStore();
     this.initLabelPage();
   }
@@ -476,10 +495,27 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  async toggleTraining(checked: boolean): Promise<void> {
+    if (!this.currentDocument) return;
+    this.markedForTraining = checked;
+    this.savingTrainingFlag = true;
+    try {
+      await this.trainingFlag.set(this.currentDocument.name, checked);
+    } catch (err) {
+      this.markedForTraining = !checked;
+      this.errorMessage = err as IStorageProviderError;
+    } finally {
+      this.savingTrainingFlag = false;
+    }
+  }
+
   private async getAndSetLabels(): Promise<void> {
     this.isLoadingLabels = true;
     try {
       if (!this.currentDocument) return;
+      this.markedForTraining = await this.trainingFlag.load(
+        this.currentDocument.name
+      );
       const labels = await this.storageProvider.readText(
         `${this.currentDocument.name}${constants.labelFileExtension}`,
         true

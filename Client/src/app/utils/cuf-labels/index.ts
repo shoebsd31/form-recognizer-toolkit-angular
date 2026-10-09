@@ -321,11 +321,13 @@ export interface InternalToCufParams {
     fields: Field[];
     definitions: Definitions;
     pageDims: CufPageDim[];
+    /** "Marked for training" flag, written to `metadata.fortraining` when defined. */
+    forTraining?: boolean;
 }
 
 /** Convert the toolkit's internal labels for one document into a CUF labels file. */
 export const internalToCufLabels = (params: InternalToCufParams): CufLabelsFile => {
-    const { documentName, mimeType, labels, fields, definitions, pageDims } = params;
+    const { documentName, mimeType, labels, fields, definitions, pageDims, forTraining } = params;
     const fieldByKey = new Map<string, Field>(fields.map((f) => [f.fieldKey, f]));
     const fieldLabels: { [k: string]: CufFieldLabel } = {};
 
@@ -362,6 +364,7 @@ export const internalToCufLabels = (params: InternalToCufParams): CufLabelsFile 
             displayName: documentName,
             type: mimeType,
             createdOn: Date.now().toString(),
+            ...(forTraining !== undefined ? { fortraining: forTraining } : {}),
         },
     };
 };

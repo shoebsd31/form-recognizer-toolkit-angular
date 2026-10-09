@@ -18,6 +18,8 @@ export const constants = {
     ocrFileExtension: ".ocr.json",
     // Content Understanding analyzer output; the OCR word overlay is now drawn from this.
     resultFileExtension: ".result.json",
+    // "Marked for training" key: labels.json `metadata.fortraining` and storage metadata.
+    forTrainingKey: "fortraining",
 };
 
 export enum LoadingOverlayWeights {
