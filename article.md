@@ -89,10 +89,13 @@ The toolkit stores boxes **normalized** (0–1), so they don't care about image 
 ```ts
 // normalized polygon  ->  one "D(page,x1,y1,...)" pixel segment
 const polygonToSource = (polygon: number[], page: number, width: number, height: number) => {
+    // images are in pixels (whole numbers); PDFs are in inches, so keep 4 decimals
+    const decimals = Math.max(width, height) < 100 ? 4 : 0;
+    const round = (n: number) => Number(n.toFixed(decimals));
     const nums: number[] = [];
     for (let i = 0; i < polygon.length; i += 2) {
-        nums.push(Math.round(polygon[i]     * width));   // x: 0.28 * 3072 -> 877
-        nums.push(Math.round(polygon[i + 1] * height));  // y: 0.008 * 4096 -> 33
+        nums.push(round(polygon[i]     * width));   // x: 0.28 * 3072 -> 877
+        nums.push(round(polygon[i + 1] * height));  // y: 0.008 * 4096 -> 33
     }
     return `D(${page},${nums.join(",")})`;
 };

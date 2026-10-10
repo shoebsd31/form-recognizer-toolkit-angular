@@ -87,7 +87,7 @@ The web component accepts the following attributes:
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `server-url` | `string` | `""` | Base URL of the file server API (e.g., `http://localhost:4000`). Leave empty if using a proxy. |
+| `server-url` | `string` | `""` | Base URL of the file server API (e.g., `http://localhost:4000`). Applies to all storage calls (files, images, metadata). Leave empty if using a proxy. |
 | `allow-table` | `boolean` | `true` | Show or hide the "Table" option in the field creation menu. |
 | `allow-draw-region` | `boolean` | `true` | Show or hide the "Draw region" button on the canvas. |
 | `allow-add-fields` | `boolean` | `true` | Show or hide the "+" button for creating new label fields. |
@@ -134,6 +134,7 @@ The web component expects a file server with the following REST endpoints:
 | `GET` | `/files/:filename` | Read a file (returns JSON or binary content) |
 | `PUT` | `/files/:filename` | Write a file (request body: `{ "content": "..." }`) |
 | `DELETE` | `/files/:filename` | Delete a file |
+| `PUT` | `/files/:filename/metadata` | *Optional.* Set storage metadata on a file (request body: `{ "metadata": { "fortraining": "true" } }`). Used by the **Mark for training** switch; a `404`/`405` is tolerated and the flag is then kept only in `.labels.json`. |
 
 ### Option A: Use the Included Express Server
 
@@ -173,7 +174,16 @@ With this setup, leave `server-url` empty (the default) so requests go to `/file
 
 ### Option C: Implement the API in Your Own Backend
 
-You can implement the four endpoints above in any backend (Node.js, .NET, Python, etc.) and set `server-url` to your API base URL.
+You can implement the endpoints above (the metadata endpoint is optional) in any backend (Node.js, .NET, Python, etc.) and set `server-url` to your API base URL.
+
+## Mark for training
+
+The label page has a **Mark for training** switch (an iPhone-style toggle above the canvas). It flags a document as a good example for retraining a Content Understanding analyzer or classifier.
+
+- The flag is saved in the labels file as `metadata.fortraining` (`true` / `false`) in `<document>.labels.json`.
+- It is also written to the storage metadata of the document (and its `.result.json`, when present) with `PUT /files/:filename/metadata`, key `fortraining`. This endpoint is optional: if your backend does not implement it (404/405), the switch still works and the flag lives only in `.labels.json`.
+- The Express server in `Server/` implements the endpoint with a sidecar file `.meta/<filename>.json`; dot-files and the `.meta` folder are hidden from `GET /files`.
+- `server-url` applies to **every** storage call (listing, reading, writing, deleting, metadata, images), so the component can be hosted on one origin and talk to an API on another.
 
 ## Preparing Documents for Labeling
 

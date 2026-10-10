@@ -81,10 +81,11 @@ The toolkit's internal label model and the entire UI are **unchanged**. Only the
 | `label: "VendorName"` | key `VendorName` | Scalar field. |
 | `label: "Items/0/UnitPrice"` (flat) | `Items.valueArray[0].valueObject.UnitPrice` (nested) | Flat `Field/row/prop` keys are grouped into nested `valueArray` → `valueObject`. Reversed on read. |
 | `value[].text` | `valueString` / `valueDate` / `valueNumber` / `valueInteger` / `valueTime` | Chosen from the field's type in `fields.json`. Date → ISO `YYYY-MM-DD`; number → numeric. Unparseable values fall back to `valueString` so nothing is lost. |
-| `value[].boundingBoxes` (normalized 0–1 polygons) | `source: "D(page,x1,y1,…);D(…)"` (page **pixels**) | One `D(…)` segment per box. See §4. |
+| `value[].boundingBoxes` (normalized 0–1 polygons) | `source: "D(page,x1,y1,…);D(…)"` (page **pixels**, or **inches** for PDFs) | One `D(…)` segment per box. See §4. |
 | *(none)* | `spans: [{ offset, length }]` | Character grounding, threaded from OCR words. See §4. |
 | `document`, `labelType` | *(dropped)* | Not part of the CUF schema. |
 | *(none)* | `metadata.displayName/type/createdOn` | Document display name, MIME type, creation timestamp. |
+| *(none)* | `metadata.fortraining` | `true`/`false`, set by the **Mark for training** switch. Also written to storage metadata (`PUT /files/:filename/metadata`). |
 
 ---
 
@@ -94,8 +95,9 @@ CUF "grounds" every value two ways (per Microsoft docs — *source* = visual pos
 
 - **`source`** — `D(page, x1,y1, x2,y2, x3,y3, x4,y4)` polygons in **page pixels**.
   The toolkit stores boxes **normalized** to 0–1. Conversion uses the OCR page `width`/`height`:
-  - write: `pixel = round(normalized × pageSize)`
-  - read: `normalized = pixel ÷ pageSize`
+  - write: `value = normalized × pageSize`, rounded to a whole number for pixel pages and to **four decimals** for PDFs, whose pages are measured in inches (a page is about 8.5 × 11, so whole numbers would snap every box to a one-inch grid)
+  - read: `normalized = value ÷ pageSize`
+  - the unit comes from the page size: a page narrower than 100 units is treated as inches
   Page dimensions come from the loaded OCR (`*.ocr.json` → `analyzeResult.pages[]`), falling back to reading the OCR file if needed.
 - **`spans`** — `{ offset, length }` into the extracted content. These are **threaded from the OCR words**: each OCR word already carries a `span`, which is now attached to its canvas feature → carried into the selected candidate → saved on the label value → aggregated into `spans[]`.
 

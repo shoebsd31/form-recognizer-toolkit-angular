@@ -507,7 +507,7 @@ Pass the full URL of your backend server directly to the component:
 <document-intelligence serverUrl="http://localhost:4000"></document-intelligence>
 ```
 
-With this approach, all API calls are made directly to `http://localhost:4000/files/...`. **No proxy configuration is needed.** Your backend must have CORS enabled to allow requests from your Angular application's origin.
+With this approach, all API calls (files, images and metadata) are made directly to `http://localhost:4000/files/...`. **No proxy configuration is needed.** Your backend must have CORS enabled to allow requests from your Angular application's origin.
 
 #### Option 2: Leave `serverUrl` empty and use a proxy
 
@@ -631,6 +631,22 @@ ng serve --proxy-config proxy.conf.json
 |--------|------|
 | `204 No Content` | *(empty)* |
 | `404 Not Found` | Error response (file does not exist) |
+
+---
+
+#### 6. `PUT /files/:filename/metadata` — Set Storage Metadata (optional)
+
+**Purpose:** The **Mark for training** switch calls this to store `fortraining` as metadata of the document (for example blob metadata in Azure Storage), so other tools can find the documents flagged for training without opening the labels.
+
+**Request Body:**
+```json
+{ "metadata": { "fortraining": "true" } }
+```
+
+**What your server should do:**
+- Merge the given keys into the metadata of the file (and leave other keys untouched).
+- Return `200 OK` with `{ "success": true }`.
+- This endpoint is optional. If it answers `404` or `405`, the component keeps the flag only in `<document>.labels.json` (`metadata.fortraining`) and carries on. The included Express server stores it in a `.meta/<filename>.json` sidecar.
 
 ---
 
