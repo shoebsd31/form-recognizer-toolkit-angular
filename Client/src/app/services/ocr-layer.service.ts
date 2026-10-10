@@ -194,6 +194,12 @@ export class OcrLayerService implements OnDestroy {
     // Private helpers
     // ---------------------------------------------------------------------------
 
+    /** Draws the OCR layer again (the extent of the image map changed). */
+    redraw(): void {
+        this.clearOcrFeatures();
+        this.redrawIfAnalyzeResultAvailable();
+    }
+
     private redrawIfAnalyzeResultAvailable(): void {
         if (!this.currentDocument) {
             return;

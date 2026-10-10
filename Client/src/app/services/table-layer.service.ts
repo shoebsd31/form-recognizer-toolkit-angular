@@ -139,6 +139,12 @@ export class TableLayerService implements OnDestroy {
     /**
      * Clears all table border and icon features from the map.
      */
+    /** Draws the tables again (the extent of the image map changed). */
+    redraw(): void {
+        this.clearTableFeatures();
+        this.redrawIfAnalyzeResultAvailable();
+    }
+
     clearTableFeatures(): void {
         this.imageMap?.removeAllTableBorderFeatures();
         this.imageMap?.removeAllTableIconFeatures();
