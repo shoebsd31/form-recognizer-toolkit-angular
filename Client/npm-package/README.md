@@ -103,7 +103,7 @@ Reference it in `angular.json`:
 
 | Property          | Type      | Default | Description                              |
 | ----------------- | --------- | ------- | ---------------------------------------- |
-| `serverUrl`       | `string`  | `""`    | Base URL for the file server API         |
+| `serverUrl`       | `string`  | `""`    | Base URL for the file server API (all calls, including images and metadata) |
 | `allowTable`      | `boolean` | `true`  | Show table field type in the fields pane |
 | `allowDrawRegion` | `boolean` | `true`  | Show the draw region tool on the canvas  |
 | `allowAddFields`  | `boolean` | `true`  | Show the add fields button in the pane   |
@@ -134,6 +134,7 @@ The component expects a REST API at the configured server URL (or proxied path):
 | `/files/:filename`     | GET    | Read a file        |
 | `/files/:filename`     | PUT    | Write a file       |
 | `/files/:filename`     | DELETE | Delete a file      |
+| `/files/:filename/metadata` | PUT | Set storage metadata, e.g. `fortraining` (optional) |
 
 See the [Server documentation](https://github.com/shoebsd31/form-recognizer-toolkit-angular) for details.
 

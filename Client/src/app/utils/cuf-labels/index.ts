@@ -176,12 +176,15 @@ const extractText = (cl: CufFieldLabel): string => {
 // Grounding helpers: source (pixels) <-> boundingBoxes (normalized 0..1)
 // ---------------------------------------------------------------------------
 
-/** One normalized polygon -> a `D(page,x1,y1,...)` pixel source segment. */
+/** One normalized polygon -> a `D(page,x1,y1,...)` source segment in the unit of the page (pixels or inches). */
 const polygonToSource = (polygon: number[], page: number, width: number, height: number): string => {
+    // Images are measured in pixels (hundreds), PDFs in inches (about 8.5 x 11): whole numbers would snap an inch box to a one-inch grid.
+    const decimals = Math.max(width, height) < 100 ? 4 : 0;
+    const round = (n: number) => Number(n.toFixed(decimals));
     const nums: number[] = [];
     for (let i = 0; i < polygon.length; i += 2) {
-        nums.push(Math.round(polygon[i] * width));
-        nums.push(Math.round(polygon[i + 1] * height));
+        nums.push(round(polygon[i] * width));
+        nums.push(round(polygon[i + 1] * height));
     }
     return `D(${page},${nums.join(",")})`;
 };
@@ -321,11 +324,13 @@ export interface InternalToCufParams {
     fields: Field[];
     definitions: Definitions;
     pageDims: CufPageDim[];
+    /** "Marked for training" flag, written to `metadata.fortraining` when defined. */
+    forTraining?: boolean;
 }
 
 /** Convert the toolkit's internal labels for one document into a CUF labels file. */
 export const internalToCufLabels = (params: InternalToCufParams): CufLabelsFile => {
-    const { documentName, mimeType, labels, fields, definitions, pageDims } = params;
+    const { documentName, mimeType, labels, fields, definitions, pageDims, forTraining } = params;
     const fieldByKey = new Map<string, Field>(fields.map((f) => [f.fieldKey, f]));
     const fieldLabels: { [k: string]: CufFieldLabel } = {};
 
@@ -362,6 +367,7 @@ export const internalToCufLabels = (params: InternalToCufParams): CufLabelsFile 
             displayName: documentName,
             type: mimeType,
             createdOn: Date.now().toString(),
+            ...(forTraining !== undefined ? { fortraining: forTraining } : {}),
         },
     };
 };

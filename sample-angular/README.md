@@ -96,7 +96,7 @@ The web component is used like any other HTML element, with Angular property bin
 
 | Property          | Type      | Default | Description                              |
 | ----------------- | --------- | ------- | ---------------------------------------- |
-| `serverUrl`       | `string`  | `""`    | Base URL for the file server API         |
+| `serverUrl`       | `string`  | `""`    | Base URL for the file server API (all calls, including images and metadata) |
 | `allowTable`      | `boolean` | `true`  | Show table field type in the fields pane |
 | `allowDrawRegion` | `boolean` | `true`  | Show the draw region tool on the canvas  |
 | `allowAddFields`  | `boolean` | `true`  | Show the add fields button in the pane   |

@@ -303,6 +303,8 @@ HTTP client wrapper for server file operations. Uses a `QueueMap` to serialize w
 - `readBinary(filename)` - GET a binary file (images)
 - `writeText(filename, content)` - PUT JSON content (queued)
 - `deleteFile(filename)` - DELETE a file
+- `setMetadata(filename, metadata)` - PUT storage metadata (optional endpoint; 404/405 tolerated)
+- `setServerUrl(url)` - Base URL for every call; set from the web component's `server-url`
 - `listFilesInFolder()` - GET file listing
 - `isFileExists(filename)` - Check file existence
 - `isValidConnection()` - Health check
@@ -344,6 +346,7 @@ The core canvas component. Wraps OpenLayers to render the document image and mul
 - `handleDrawing` - Emits drawing state changes
 - `handleVertexDrag` - Emits vertex drag state
 - `handleIsSnapped` - Emits snap state
+- `imageReset` - Emits after a new image replaced the old one (the map extent was rebuilt); the canvas redraws the OCR, table and label layers on it, so boxes stay aligned when switching between documents of different page sizes (A4 / Letter)
 
 **Layers (in z-order):**
 1. `imageLayer` - Static image layer (document)
@@ -458,6 +461,7 @@ Uses `angular-split` (`as-split`, `as-split-area`) for resizable panes.
 - Loads OCR data from `<doc>.ocr.json` and dispatches predictions
 - Manages `isTablePaneOpen` state and passes it to the label pane
 - Handles error display via `MessageModalComponent`
+- Shows the page title "Document labels" and the **Mark for training** switch, which uses `TrainingFlagService` to write `metadata.fortraining` into the labels file and to the storage metadata
 
 **Lifecycle:**
 1. `ngOnInit` - Dispatch `loadDocuments`, call `getAndSetFields()`

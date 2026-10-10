@@ -10,7 +10,8 @@
  *     - ungrounded field (no value)     -> mapStatus "skip" (no value/spans/source)
  *     - array (e.g. Items)              -> kind "predicted", metadata.mapStatus "skip",
  *                                          valueArray[] of objects -> valueObject{ prop: ... }
- *   `source` pixel polygons are rounded to integers, as the reference files store them.
+ *   `source` polygons of pixel pages (images) are rounded to integers, as the reference files store them. PDF pages are measured
+ *   in inches (`contents[].unit`), where whole numbers would snap every box to a one-inch grid, so those keep four decimals.
  *
  * The optional field schema (from the analyzer definition) fixes the field order
  * and ensures schema fields missing from the result are still emitted as "skip".
@@ -40,8 +41,10 @@ const VALUE_KEYS = [
     "valueObject",
 ] as const;
 
-/** Round the pixel coordinates in a `D(page,x1,y1,...)` source string to integers. */
-const roundSource = (src?: string): string | undefined => {
+/**
+ * Round the coordinates in a `D(page,x1,y1,...)` source string: whole numbers for pixel pages, four decimals for inch pages (PDF).
+ */
+const roundSource = (src: string | undefined, pixels: boolean): string | undefined => {
     if (!src) return undefined;
     const segs = src
         .split(";")
@@ -52,8 +55,10 @@ const roundSource = (src?: string): string | undefined => {
             if (!m) return seg;
             const parts = m[1].split(",").map((p) => p.trim());
             const [page, ...nums] = parts;
-            const ints = nums.map((n) => String(Math.round(parseFloat(n))));
-            return `D(${[page, ...ints].join(",")})`;
+            const rounded = nums.map((n) =>
+                pixels ? String(Math.round(parseFloat(n))) : String(Number(parseFloat(n).toFixed(4)))
+            );
+            return `D(${[page, ...rounded].join(",")})`;
         });
     return segs.length ? segs.join(";") : undefined;
 };
@@ -69,13 +74,13 @@ const displayText = (rf: any): string | undefined => {
 };
 
 /** Convert one scalar result field into a CUF label field. */
-const convertScalar = (rf: any, declaredType = "string"): any => {
+const convertScalar = (rf: any, declaredType = "string", pixels = true): any => {
     const out: any = { type: rf.type || declaredType };
     const valKey = VALUE_KEYS.find((k) => rf[k] !== undefined);
     if (valKey) out[valKey] = rf[valKey];
     if (Array.isArray(rf.spans) && rf.spans.length) out.spans = rf.spans;
     if (rf.confidence !== undefined) out.confidence = rf.confidence;
-    const src = roundSource(rf.source);
+    const src = roundSource(rf.source, pixels);
     if (src) out.source = src;
     out.kind = "predicted";
     out.metadata = valKey && src ? { mapStatus: "succeed", content: displayText(rf) } : { mapStatus: "skip" };
@@ -83,7 +88,7 @@ const convertScalar = (rf: any, declaredType = "string"): any => {
 };
 
 /** Convert an array (table) result field into a CUF label field. */
-const convertArray = (rf: any, itemProps?: Record<string, CufFieldDef>): any => {
+const convertArray = (rf: any, itemProps?: Record<string, CufFieldDef>, pixels = true): any => {
     const out: any = { type: "array", kind: "predicted", metadata: { mapStatus: "skip" }, valueArray: [] as any[] };
     for (const row of rf?.valueArray || []) {
         const rowObj = row?.valueObject || {};
@@ -92,7 +97,7 @@ const convertArray = (rf: any, itemProps?: Record<string, CufFieldDef>): any => 
         const valueObject: Record<string, any> = {};
         for (const prop of propOrder) {
             if (rowObj[prop] !== undefined) {
-                valueObject[prop] = convertScalar(rowObj[prop], itemProps?.[prop]?.type || "string");
+                valueObject[prop] = convertScalar(rowObj[prop], itemProps?.[prop]?.type || "string", pixels);
             }
         }
         out.valueArray.push({ type: "object", kind: "predicted", metadata: { mapStatus: "skip" }, valueObject });
@@ -113,7 +118,8 @@ export const resultToCufLabels = (resultJson: any, opts: ResultToLabelsOptions =
     const rfields: Record<string, any> = content.fields || {};
 
     const schemaFields = opts.fieldSchema?.fields;
-    const itemProps = schemaFields?.["Items"]?.items?.properties;
+    // images are measured in pixels, PDFs in inches
+    const pixels = String(content.unit ?? "pixel").toLowerCase() !== "inch";
     // Field order: analyzer schema when provided, else the result's own fields.
     const fieldNames = schemaFields ? Object.keys(schemaFields) : Object.keys(rfields);
 
@@ -122,13 +128,12 @@ export const resultToCufLabels = (resultJson: any, opts: ResultToLabelsOptions =
         const declaredType = schemaFields?.[name]?.type || rfields[name]?.type || "string";
         const rf = rfields[name];
         if (declaredType === "array") {
-            const props = schemaFields?.[name]?.items?.properties || itemProps;
-            fieldLabels[name] = convertArray(rf || {}, props);
+            fieldLabels[name] = convertArray(rf || {}, schemaFields?.[name]?.items?.properties, pixels);
         } else if (rf === undefined) {
             // Schema field absent from the result -> emit as skipped.
             fieldLabels[name] = { type: declaredType, kind: "predicted", metadata: { mapStatus: "skip" } };
         } else {
-            fieldLabels[name] = convertScalar(rf, declaredType);
+            fieldLabels[name] = convertScalar(rf, declaredType, pixels);
         }
     }
 

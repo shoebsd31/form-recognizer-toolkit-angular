@@ -5,6 +5,7 @@ import { CufPageDim } from "../../models/cuf-labels";
 import { IDocument } from "../../store/documents/documents.types";
 import { StorageProviderService } from "../../providers/storage-provider.service";
 import { constants } from "../../consts/constants";
+import { TrainingFlagService } from "../training-flag.service";
 import { IAssetService } from "./asset-service.interface";
 import { selectFields, selectDefinitions } from "../../store/custom-model/custom-model.selectors";
 import { selectPredictions } from "../../store/predictions/predictions.selectors";
@@ -31,7 +32,11 @@ export class CustomModelAssetService implements IAssetService {
     private definitions: Definitions = {};
     private predictions: Record<string, any> = {};
 
-    constructor(private storageProvider: StorageProviderService, private store: Store) {
+    constructor(
+        private storageProvider: StorageProviderService,
+        private store: Store,
+        private trainingFlag: TrainingFlagService
+    ) {
         this.store.select(selectFields).subscribe((fields) => (this.fields = fields));
         this.store.select(selectDefinitions).subscribe((definitions) => (this.definitions = definitions));
         this.store.select(selectPredictions).subscribe((predictions) => (this.predictions = predictions));
@@ -107,9 +112,11 @@ export class CustomModelAssetService implements IAssetService {
                     fields: this.fields,
                     definitions: this.definitions,
                     pageDims,
+                    forTraining: this.trainingFlag.get(documentName),
                 });
                 const content = JSON.stringify(cufFile, null, 2);
                 await this.storageProvider.writeText(labelFile, content);
+                await this.trainingFlag.applyMetadata(labelFile, documentName);
             })
         );
     }

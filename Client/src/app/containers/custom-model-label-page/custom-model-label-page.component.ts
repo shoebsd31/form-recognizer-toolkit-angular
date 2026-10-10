@@ -1,4 +1,4 @@
-import { Component, Input, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import { Subject, combineLatest } from 'rxjs';
@@ -36,6 +36,7 @@ import {
   getPageDimsFromAnalyzeResult,
 } from '../../utils/cuf-labels';
 import { CufPageDim } from '../../models/cuf-labels';
+import { TrainingFlagService } from '../../services/training-flag.service';
 import { LABELING_CONFIG, LabelingConfig } from '../../models/labeling-config';
 
 import {
@@ -82,9 +83,27 @@ const LOADING_OVERLAY_NAME = 'customModelLabelPage';
   template: `
     <div class="custom-doc-label-page">
       <div class="label-page-header">
-        <h2 class="page-title" tabindex="0" aria-label="Label Page">
-          Label Page
+        <h2 class="page-title" tabindex="0" aria-label="Document labels">
+          Document labels
         </h2>
+        @if (currentDocument) {
+        <button
+          type="button"
+          class="training-toggle"
+          [class.on]="markedForTraining"
+          role="switch"
+          [attr.aria-checked]="markedForTraining"
+          [disabled]="savingTrainingFlag"
+          title="Mark this document as an example for training the classifier. The flag is saved with the document."
+          (click)="toggleTraining(!markedForTraining)"
+        >
+          <span class="training-label">Mark for training</span>
+          <span class="training-track" aria-hidden="true"><span class="training-thumb"></span></span>
+          <span class="training-state">{{
+            savingTrainingFlag ? 'Saving…' : markedForTraining ? 'On' : 'Off'
+          }}</span>
+        </button>
+        }
       </div>
       <div class="label-page-main">
         <div class="label-page-gallery">
@@ -198,6 +217,8 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
   errorMessage: IStorageProviderError | undefined = undefined;
   splitPaneSizes: SplitPaneSizes = constants.defaultSplitPaneSizes;
   showEmptyFolderMessage: boolean = false;
+  markedForTraining: boolean = false;
+  savingTrainingFlag: boolean = false;
 
   // Store state
   labelError: { name: string; message: string } | null = null;
@@ -211,7 +232,9 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     private storageProvider: StorageProviderService,
-    @Inject(LABELING_CONFIG) private config: LabelingConfig
+    @Inject(LABELING_CONFIG) private config: LabelingConfig,
+    private trainingFlag: TrainingFlagService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get currentSplitSize(): number[] {
@@ -221,6 +244,7 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (this.serverUrl) this.storageProvider.setServerUrl(this.serverUrl);
     this.subscribeToStore();
     this.initLabelPage();
   }
@@ -476,10 +500,31 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  async toggleTraining(checked: boolean): Promise<void> {
+    if (!this.currentDocument) return;
+    this.markedForTraining = checked;
+    this.savingTrainingFlag = true;
+    this.cdr.markForCheck();
+    try {
+      await this.trainingFlag.set(this.currentDocument.name, checked);
+    } catch (err) {
+      this.markedForTraining = !checked;
+      this.errorMessage = err as IStorageProviderError;
+    } finally {
+      this.savingTrainingFlag = false;
+      // the app can run without zone.js: a change made after an await is only drawn when the view is marked
+      this.cdr.markForCheck();
+    }
+  }
+
   private async getAndSetLabels(): Promise<void> {
     this.isLoadingLabels = true;
     try {
       if (!this.currentDocument) return;
+      this.markedForTraining = await this.trainingFlag.load(
+        this.currentDocument.name
+      );
+      this.cdr.markForCheck();
       const labels = await this.storageProvider.readText(
         `${this.currentDocument.name}${constants.labelFileExtension}`,
         true

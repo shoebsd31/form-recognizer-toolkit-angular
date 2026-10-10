@@ -21,6 +21,11 @@ export class StorageProviderService {
         this.serverUrl = config.serverSiteUrl;
     }
 
+    /** Lets the host point the whole tool at another file-server base URL (the `server-url` attribute). */
+    setServerUrl(url: string) {
+        this.serverUrl = url;
+    }
+
     async isValidConnection(): Promise<boolean | undefined> {
         try {
             const result = await firstValueFrom(this.http.get<any>(this.serverUrl));
@@ -75,6 +80,19 @@ export class StorageProviderService {
             await firstValueFrom(this.http.put(api, { content }));
         } catch (ex) {
             this.storageErrorHandler(ex);
+        }
+    }
+
+    /**
+     * Sets storage metadata (e.g. `{ fortraining: "true" }`) on a stored file.
+     * Metadata-only: file content is untouched. Missing files are ignored.
+     */
+    async setMetadata(filename: string, metadata: Record<string, string>): Promise<void> {
+        try {
+            const api = `${this.serverUrl}/files/${filename}/metadata`;
+            await firstValueFrom(this.http.put(api, { metadata }));
+        } catch (ex) {
+            this.storageErrorHandler(ex, true);
         }
     }
 

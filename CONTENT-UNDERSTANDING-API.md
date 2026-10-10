@@ -55,7 +55,7 @@ curl -X POST "http://localhost:4000/cu/labels/testimg1.jpg?analyzerId=analyzer1"
 ```
 
 Each field is mapped to `{ type, value*, spans, confidence, source, kind: "predicted",
-metadata: { mapStatus, content } }`; `source` pixel polygons are rounded to integers.
+metadata: { mapStatus, content } }`; `source` polygons are rounded by unit: whole numbers for pixel pages (images), four decimals for inch pages (PDFs, `contents[].unit` = `inch`). OCR word boxes (`pages[].words`) only appear when the analyzer was built with OCR and **Return details** enabled; otherwise the workbench adds them with a second `prebuilt-read` analysis.
 Implementation: [`Server/utils/resultToLabels.ts`](Server/utils/resultToLabels.ts).
 
 **Studio mode (`?studio=true`)** — emit a trio ready to drop into a Content

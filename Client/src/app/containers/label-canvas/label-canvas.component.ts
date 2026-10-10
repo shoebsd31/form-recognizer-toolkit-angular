@@ -74,6 +74,7 @@ import { defaultStyler } from '../../utils/styler';
           [enableFeatureSelection]="true"
           [drawRegionMode]="drawRegionMode"
           (setImageMap)="onSetImageMap($event)"
+          (imageReset)="onImageReset()"
           (onMapReady)="onMapReady()"
           (handleFeatureSelect)="onFeatureSelect($event)"
           (onFinishFeatureSelect)="onFinishFeatureSelect()"
@@ -275,6 +276,16 @@ export class LabelCanvasComponent implements OnInit, OnDestroy {
     this.ocrLayerService.initialize(imageMap);
     this.tableLayerService.initialize(imageMap);
     this.labelService.initialize(imageMap);
+  }
+
+  /**
+   * The image map switched to another page or document and has its new extent. Everything drawn before that used the old extent
+   * (a document with another page size, e.g. A4 after Letter, put every box in the wrong place until a full reload), so draw it again.
+   */
+  onImageReset(): void {
+    this.ocrLayerService.redraw();
+    this.tableLayerService.redraw();
+    this.labelService.redraw();
   }
 
   onMapReady(): void {

@@ -573,6 +573,11 @@ export class CustomModelLabelService implements OnDestroy {
     // Private helpers
     // ---------------------------------------------------------------------------
 
+    /** Draws the labels again (the extent of the image map changed). */
+    redraw(): void {
+        this.handleLabelsChanged();
+    }
+
     private handleLabelsChanged(): void {
         if (!this.currentDocument) {
             return;

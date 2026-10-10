@@ -120,6 +120,7 @@ The app connects to a local Express server at `http://localhost:4000` (configure
 - `GET /files/:name` - Read file (JSON or binary)
 - `PUT /files/:name` - Write file
 - `DELETE /files/:name` - Delete file
+- `PUT /files/:name/metadata` - Set storage metadata such as `fortraining` (optional)
 
 Document images, OCR results (`.ocr.json`), labels (`.labels.json`), and field definitions (`fields.json`) are all stored server-side.
 

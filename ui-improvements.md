@@ -20,7 +20,7 @@ Both changes build cleanly (`ng build`).
 
 ## 1. Snapshot of the current screen
 
-- **Shell:** page title "Label Page", a left document gallery (thumbnails), a resizable split between the **canvas** (center) and the **field pane** (right).
+- **Shell:** page title "Document labels", a left document gallery (thumbnails), a resizable split between the **canvas** (center) and the **field pane** (right).
 - **Canvas:** a photographed receipt (skewed, low-contrast) overlaid with dense, overlapping colored OCR/word boxes. Bottom bar has page control (`1 of 1`), zoom in/out, pan, rotate.
 - **Field pane:** a flat list of fields, each a `●` color dot + name + extracted value + `✕` delete + drag handle + `⋮` overflow menu. A `+` adds fields. Example values visible: `InvoiceDate 20.09.2025`, `VendorName BILLA VOLLER LEBEN. Billa AG`, `InvoiceTotal EUR 45. 35 Zitronen`, several fields empty (`SubTotal`, `TotalTax`).
 
@@ -110,7 +110,7 @@ The current UI is built for **custom Form Recognizer labeling** (define `fields.
 9. **Image tooling:** auto-deskew, brightness/contrast, crop for photographed documents.
 10. **Accessibility:** non-color field encoding, full `aria-label` coverage, keyboard-first correction (Tab between fields, Enter to edit/approve).
 11. **Theming tokens** (CSS custom properties) so the embedding host can brand the UI.
-12. **Rebalance the canvas command bar** now that "Draw region" is gone; reconsider the page title "Label Page" to reflect a review/verification task.
+12. **Rebalance the canvas command bar** now that "Draw region" is gone; the page title was renamed from "Label Page" to "Document labels"; the **Mark for training** switch sits above the canvas.
 
 ---
 

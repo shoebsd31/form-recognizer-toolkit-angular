@@ -128,6 +128,11 @@ export class ImageMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Output() handleVertexDrag = new EventEmitter<boolean>();
   @Output() handleIsSnapped = new EventEmitter<boolean>();
   @Output() setImageMap = new EventEmitter<ImageMapComponent>();
+  /**
+   * The map now shows another image (another page or document) and its extent has been updated. Features that were drawn
+   * with the previous extent (labels, OCR words, tables) are in the wrong place for this image and must be drawn again.
+   */
+  @Output() imageReset = new EventEmitter<void>();
 
   private map!: Map;
   private imageLayer: any;
@@ -208,6 +213,8 @@ export class ImageMapComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.updateSize();
         this.prevImageUri = this.imageUri;
         this.prevImageAngle = this.imageAngle;
+        // after the current change detection, so the redraw can safely update the store
+        Promise.resolve().then(() => this.imageReset.emit());
       }
     }
   }
