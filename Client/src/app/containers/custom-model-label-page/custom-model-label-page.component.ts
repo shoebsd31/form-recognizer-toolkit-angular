@@ -1,4 +1,4 @@
-import { Component, Input, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import { Subject, combineLatest } from 'rxjs';
@@ -87,18 +87,22 @@ const LOADING_OVERLAY_NAME = 'customModelLabelPage';
           Label Page
         </h2>
         @if (currentDocument) {
-        <label
+        <button
+          type="button"
           class="training-toggle"
-          title="Mark this document for classifier/analyzer training"
+          [class.on]="markedForTraining"
+          role="switch"
+          [attr.aria-checked]="markedForTraining"
+          [disabled]="savingTrainingFlag"
+          title="Mark this document as an example for training the classifier. The flag is saved with the document."
+          (click)="toggleTraining(!markedForTraining)"
         >
-          <input
-            type="checkbox"
-            [checked]="markedForTraining"
-            [disabled]="savingTrainingFlag"
-            (change)="toggleTraining($any($event.target).checked)"
-          />
-          Mark for training
-        </label>
+          <span class="training-label">Mark for training</span>
+          <span class="training-track" aria-hidden="true"><span class="training-thumb"></span></span>
+          <span class="training-state">{{
+            savingTrainingFlag ? 'Saving…' : markedForTraining ? 'On' : 'Off'
+          }}</span>
+        </button>
         }
       </div>
       <div class="label-page-main">
@@ -229,7 +233,8 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
     private store: Store,
     private storageProvider: StorageProviderService,
     @Inject(LABELING_CONFIG) private config: LabelingConfig,
-    private trainingFlag: TrainingFlagService
+    private trainingFlag: TrainingFlagService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get currentSplitSize(): number[] {
@@ -499,6 +504,7 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
     if (!this.currentDocument) return;
     this.markedForTraining = checked;
     this.savingTrainingFlag = true;
+    this.cdr.markForCheck();
     try {
       await this.trainingFlag.set(this.currentDocument.name, checked);
     } catch (err) {
@@ -506,6 +512,8 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
       this.errorMessage = err as IStorageProviderError;
     } finally {
       this.savingTrainingFlag = false;
+      // the app can run without zone.js: a change made after an await is only drawn when the view is marked
+      this.cdr.markForCheck();
     }
   }
 
@@ -516,6 +524,7 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
       this.markedForTraining = await this.trainingFlag.load(
         this.currentDocument.name
       );
+      this.cdr.markForCheck();
       const labels = await this.storageProvider.readText(
         `${this.currentDocument.name}${constants.labelFileExtension}`,
         true
