@@ -83,8 +83,8 @@ const LOADING_OVERLAY_NAME = 'customModelLabelPage';
   template: `
     <div class="custom-doc-label-page">
       <div class="label-page-header">
-        <h2 class="page-title" tabindex="0" aria-label="Label Page">
-          Label Page
+        <h2 class="page-title" tabindex="0" aria-label="Document labels">
+          Document labels
         </h2>
         @if (currentDocument) {
         <button
