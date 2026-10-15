@@ -2,8 +2,11 @@ const fs = require("fs");
 const path = require("path");
 
 const SOURCE_DIR = path.join(__dirname, "..", "dist", "document-intelligence-element", "browser");
-const TARGET_DIR = path.join(__dirname, "..", "dist", "npm-package");
-const TEMPLATE_DIR = path.join(__dirname, "..", "npm-package");
+// Usage: node scripts/prepare-package.js [templateDir] [targetDir]
+//   default: npm-package -> dist/npm-package (@shoebsd31/document-intelligence)
+//   e.g.     packages/content-understanding-labeling -> dist/content-understanding-labeling
+const TEMPLATE_DIR = path.resolve(__dirname, "..", process.argv[2] || "npm-package");
+const TARGET_DIR = path.resolve(__dirname, "..", process.argv[3] || path.join("dist", "npm-package"));
 const LICENSES_SOURCE = path.join(__dirname, "..", "dist", "document-intelligence-element", "3rdpartylicenses.txt");
 
 function copyDirRecursive(src, dest) {
