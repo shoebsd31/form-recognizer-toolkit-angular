@@ -2,7 +2,19 @@ import * as pdfjsLib from "pdfjs-dist";
 import { loadCanvasToBlob } from "../index";
 import { IDocumentLoader } from "./index";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${(pdfjsLib as any).version}/pdf.worker.min.js`;
+/**
+ * The pdf.js worker ships next to the bundle as `pdf.worker.min.mjs` (the old cdnjs `pdf.worker.min.js` does not exist for pdfjs-dist 4.x).
+ * By default it is resolved relative to this script, so it works wherever the host serves the files (including under a path prefix).
+ * A host can override it with the element's `worker-src` attribute (see document-intelligence.element.ts) or, for older hosts,
+ * `window.__cufLabelingToolBase` (folder URL ending in "/").
+ */
+export function defaultPdfWorkerSrc(): string {
+    const legacyBase = (globalThis as any).__cufLabelingToolBase as string | undefined;
+    if (legacyBase) return legacyBase + "pdf.worker.min.mjs";
+    return new URL("pdf.worker.min.mjs", import.meta.url).href;
+}
+
+if (!pdfjsLib.GlobalWorkerOptions.workerSrc) pdfjsLib.GlobalWorkerOptions.workerSrc = defaultPdfWorkerSrc();
 
 export class PdfLoader implements IDocumentLoader {
     private url: string;

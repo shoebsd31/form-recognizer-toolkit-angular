@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { Store } from "@ngrx/store";
 import { from, of } from "rxjs";
-import { switchMap, map, catchError, withLatestFrom } from "rxjs/operators";
+import { switchMap, mergeMap, map, catchError, withLatestFrom } from "rxjs/operators";
 import { DocumentLoaderFactory, IDocumentLoader } from "../../utils/document-loader";
 import { IRawDocument } from "./documents.types";
 import * as DocumentsActions from "./documents.actions";
@@ -24,7 +24,7 @@ export class DocumentsEffects {
     addDocuments$ = createEffect(() =>
         this.actions$.pipe(
             ofType(DocumentsActions.addDocuments),
-            switchMap(({ documents }) => {
+            mergeMap(({ documents }) => {
                 return from(
                     Promise.all(documents.map(async (doc) => (await getLoader(doc)).loadDocumentMeta()))
                 ).pipe(

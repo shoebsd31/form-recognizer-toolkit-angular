@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import * as pdfjsLib from 'pdfjs-dist';
 
 import { CustomModelLabelPageComponent } from './containers/custom-model-label-page/custom-model-label-page.component';
 
@@ -31,4 +32,9 @@ export class DocumentIntelligenceElement {
   @Input() allowTable: boolean = true;
   @Input() allowDrawRegion: boolean = true;
   @Input() allowAddFields: boolean = true;
+
+  /** URL of pdf.worker.min.mjs. Default: the file shipped next to the bundle. Set it when the worker is served from elsewhere. */
+  @Input() set workerSrc(value: string | null | undefined) {
+    if (value) pdfjsLib.GlobalWorkerOptions.workerSrc = value;
+  }
 }

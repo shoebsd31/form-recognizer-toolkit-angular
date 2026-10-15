@@ -1,0 +1,39 @@
+{
+    "name": "content-understanding-labeling",
+    "version": "0.1.0",
+    "description": "Labeling UX for Azure AI Content Understanding as a self-contained web component (<document-intelligence>): review OCR words, draw and edit field labels and tables, mark documents for training.",
+    "license": "MIT",
+    "author": "shoebsd31",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/shoebsd31/form-recognizer-toolkit-angular.git",
+        "directory": "Client"
+    },
+    "homepage": "https://github.com/shoebsd31/form-recognizer-toolkit-angular#readme",
+    "bugs": "https://github.com/shoebsd31/form-recognizer-toolkit-angular/issues",
+    "keywords": [
+        "content-understanding",
+        "azure-ai",
+        "document-intelligence",
+        "labeling",
+        "web-component",
+        "custom-element",
+        "angular-elements"
+    ],
+    "files": [
+        "main.js",
+        "polyfills.js",
+        "styles.css",
+        "chunk-*.js",
+        "pdf.worker.min.mjs",
+        "media/**",
+        "assets/**",
+        "3rdpartylicenses.txt",
+        "README.md",
+        "LICENSE"
+    ],
+    "main": "main.js",
+    "sideEffects": true,
+    "unpkg": "main.js",
+    "jsdelivr": "main.js"
+}
