@@ -1,6 +1,6 @@
 {
     "name": "content-understanding-labeling",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "Labeling UX for Azure AI Content Understanding as a self-contained web component (<document-intelligence>): review OCR words, draw and edit field labels and tables, mark documents for training.",
     "license": "MIT",
     "author": "shoebsd31",
