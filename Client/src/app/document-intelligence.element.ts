@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, booleanAttribute } from '@angular/core';
 import * as pdfjsLib from 'pdfjs-dist';
 
 import { CustomModelLabelPageComponent } from './containers/custom-model-label-page/custom-model-label-page.component';
@@ -29,9 +29,10 @@ import { CustomModelLabelPageComponent } from './containers/custom-model-label-p
 })
 export class DocumentIntelligenceElement {
   @Input() serverUrl: string = '';
-  @Input() allowTable: boolean = true;
-  @Input() allowDrawRegion: boolean = true;
-  @Input() allowAddFields: boolean = true;
+  // HTML attributes arrive as strings: booleanAttribute turns "false" into false ("" / "true" / present = true)
+  @Input({ transform: booleanAttribute }) allowTable: boolean = true;
+  @Input({ transform: booleanAttribute }) allowDrawRegion: boolean = true;
+  @Input({ transform: booleanAttribute }) allowAddFields: boolean = true;
 
   /** URL of pdf.worker.min.mjs. Default: the file shipped next to the bundle. Set it when the worker is served from elsewhere. */
   @Input() set workerSrc(value: string | null | undefined) {
