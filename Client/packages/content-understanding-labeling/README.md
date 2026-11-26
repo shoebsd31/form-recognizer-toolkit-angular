@@ -4,7 +4,7 @@ A labeling user interface for **Azure AI Content Understanding**, packaged as a 
 
 Point it at a folder of documents and their Content Understanding results, and people can:
 
-* browse the documents (PDF, TIFF, PNG, JPEG, BMP) with thumbnails and page navigation,
+* browse the documents (PDF, TIFF, PNG, JPEG, BMP): pick a document, then move between its pages with page thumbnails,
 * see the OCR words Content Understanding found, overlaid on the page,
 * create fields and label values by clicking words or drawing regions, including **tables**, **selection marks** and **signatures**,
 * label exactly the fields of your analyzer — the field list comes from the analyzer definition (`analyzer.json`),
@@ -425,7 +425,8 @@ Tips:
 
 | Action | How |
 |---|---|
-| Open a document | Click it in the document list on the left (thumbnails and page counts load for every document). |
+| Open a document | Use the picker at the top of the left sidebar: previous/next, or click the name to open a filterable list (type part of a name, **Enter** opens the first match). Only the open document is downloaded. |
+| Go to a page | Click a page thumbnail in the left sidebar, or use the page arrows under the document. |
 | Label a value | Select a field on the right, then click words on the page — or select words first and choose the field. |
 | Select several words | Hold **Shift** and drag a box, or Shift-click words. |
 | Draw a region | **Draw region** (when `allow-draw-region` is on), click the corners; **Esc** cancels. |
@@ -487,6 +488,11 @@ Current versions of Chrome, Edge, Firefox and Safari (ES2022 modules, custom ele
 
 ---
 
+## Changes in 1.1.0
+
+* **Faster with large folders:** listing documents no longer downloads them. A document is fetched only when it is opened, so the page is ready right away however many documents the folder holds.
+* **New left sidebar:** a document picker (previous/next, "Document N of M", filterable list with delete) above thumbnails of the open document's pages. Clicking a thumbnail goes to that page; the page arrows keep the thumbnails in sync. Returning to a document reopens the page you were on.
+
 ## Changes compared with @shoebsd31/document-intelligence 0.0.1
 
 This package replaces `@shoebsd31/document-intelligence`:
@@ -496,7 +502,7 @@ This package replaces `@shoebsd31/document-intelligence`:
 * The field list comes from the Content Understanding **`analyzer.json`**; `fields.json` is only a fallback.
 * Labels are written in the **Content Understanding** format; PDF coordinates keep their decimals (inches).
 * Labels, OCR words and tables are redrawn when switching to a document with another page size.
-* **All documents** of a large folder load (thumbnails, page counts, OCR overlays), not only the last batch.
+* **All documents** of a large folder are listed, not only the last batch.
 * The **pdf.js worker ships in the package** and is found next to the bundle (works under a path prefix); new `worker-src` attribute.
 * Images in `assets/` load from the package folder, not from the host page.
 * `allow-table="false"`, `allow-draw-region="false"` and `allow-add-fields="false"` now really disable the feature (the string `"false"` used to count as true).
