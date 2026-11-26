@@ -11,6 +11,10 @@ export const DocumentMimeType = {
 export interface IDocumentLoader {
     loadDocumentMeta(): Promise<any>;
     loadDocumentPage(pageNumber: number): Promise<any>;
+    /** Number of pages, without rendering anything. */
+    loadPageCount(): Promise<number>;
+    /** Small object URL preview of one page (1-based), at most `maxWidth` pixels wide. */
+    loadPageThumbnail(pageNumber: number, maxWidth: number): Promise<string>;
 }
 
 export function getDocumentType(name: string): string {

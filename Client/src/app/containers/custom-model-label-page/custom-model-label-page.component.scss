@@ -89,8 +89,11 @@
         overflow: hidden;
 
         .label-page-gallery {
-            flex: 0 0 180px;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            flex: 0 0 200px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .split-container {

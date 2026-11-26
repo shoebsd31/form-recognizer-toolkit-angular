@@ -41,9 +41,9 @@ export const documentsReducer = createReducer(
             ...docs.map((doc) => ({
                 ...doc,
                 thumbnail: "",
-                numPages: 0,
-                currentPage: 0,
-                states: { loadingStatus: DocumentStatus.Loading as const },
+                numPages: 0, // known once the document is opened
+                currentPage: 1,
+                states: { loadingStatus: DocumentStatus.Loaded as const },
             })),
         ],
     })),
@@ -66,9 +66,18 @@ export const documentsReducer = createReducer(
     on(DocumentsActions.setCurrentDocumentSuccess, (state, { document, documentPage }) => {
         const updatedDoc = { ...document, states: { ...document.states, loadingStatus: DocumentStatus.Loaded as const } };
         const documents = state.documents.map((doc) =>
-            doc.name === document.name ? { ...doc, states: { ...doc.states, loadingStatus: DocumentStatus.Loaded as const } } : doc
+            doc.name === document.name
+                ? {
+                      ...doc,
+                      numPages: document.numPages,
+                      currentPage: document.currentPage,
+                      states: { ...doc.states, loadingStatus: DocumentStatus.Loaded as const },
+                  }
+                : doc
         );
-        return { ...state, documents, currentDocument: updatedDoc };
+        // keep statuses that changed while the document was loading
+        const states = documents.find((d) => d.name === document.name)?.states ?? updatedDoc.states;
+        return { ...state, documents, currentDocument: { ...updatedDoc, states } };
     }),
     on(DocumentsActions.setCurrentPageSuccess, (state, { pageNumber }) => {
         const documents = state.documents.map((doc) =>
