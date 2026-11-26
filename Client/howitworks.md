@@ -471,11 +471,11 @@ Uses `angular-split` (`as-split`, `as-split-area`) for resizable panes.
 
 ### `DocumentGalleryComponent` (`containers/document-gallery/`)
 
-Left sidebar showing the list of documents.
+Left sidebar: pick a document, then move between its pages.
 
-**Child components:**
-- `DocumentPreviewListComponent` - Scrollable list of document thumbnails
-- `DocumentPreviewComponent` - Individual document thumbnail with selection state
+**Parts:**
+- Document picker: previous/next buttons and a filterable list of document names (listing downloads nothing; a document is fetched only when opened)
+- Page strip: thumbnails of the pages of the open document; clicking one dispatches `setCurrentPage`
 
 **How it works:**
 - Subscribes to `selectDocuments` for the document list
@@ -521,7 +521,7 @@ Right sidebar for field management and label assignment.
 1. **Field List View** (default) - Shows all fields with their labels via `<app-label-list>`
 2. **Table Pane View** - Shows when a table field is clicked, with `<app-table-label-item>`
 
-**Child components:**
+**Parts:**
 - `LabelListComponent` - Renders the list of fields with drag-and-drop reordering
 - `LabelItemComponent` - Individual field with label value, context menu, rename
 - `TableLabelItemComponent` - Table grid with clickable cells for label assignment

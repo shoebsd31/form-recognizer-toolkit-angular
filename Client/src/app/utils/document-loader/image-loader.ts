@@ -25,6 +25,14 @@ export class ImageLoader implements IDocumentLoader {
         };
     }
 
+    async loadPageCount() {
+        return 1;
+    }
+
+    async loadPageThumbnail(_pageNumber: number, _maxWidth: number) {
+        return this.url;
+    }
+
     async loadDocumentPage(pageNumber: number) {
         const { width, height } = await this.loadImage();
 

@@ -13,11 +13,7 @@ export class TiffLoader implements IDocumentLoader {
     }
 
     async loadDocumentMeta() {
-        const buffer = await loadUrlToArrayBuffer(this.url);
-        this.pages = UTIF.decode(buffer);
-        UTIF.decodeImage(buffer, this.pages[0]);
-
-        const canvas = this.renderPage(this.pages[0]);
+        const canvas = this.renderPage(await this.getPage(1));
         const blob = await loadCanvasToBlob(canvas);
         const thumbnail = URL.createObjectURL(blob);
 
@@ -32,16 +28,43 @@ export class TiffLoader implements IDocumentLoader {
         };
     }
 
-    async loadDocumentPage(pageNumber: number) {
-        if (this.pages.length === 0) {
-            const buffer = await loadUrlToArrayBuffer(this.url);
-            this.pages = UTIF.decode(buffer);
+    private buffer?: Promise<ArrayBuffer>;
+
+    // Download once; decode the IFD list once; decode page pixels on demand.
+    private async getBuffer() {
+        if (!this.buffer) {
+            this.buffer = loadUrlToArrayBuffer(this.url);
+            this.buffer.catch(() => (this.buffer = undefined));
         }
+        return this.buffer;
+    }
+
+    private async getPage(pageNumber: number) {
+        const buffer = await this.getBuffer();
+        if (this.pages.length === 0) this.pages = UTIF.decode(buffer);
         const page = this.pages[pageNumber - 1];
-        if (!page.data) {
-            const buffer = await loadUrlToArrayBuffer(this.url);
-            UTIF.decodeImage(buffer, page);
-        }
+        if (!page.data) UTIF.decodeImage(buffer, page);
+        return page;
+    }
+
+    async loadPageCount() {
+        const buffer = await this.getBuffer();
+        if (this.pages.length === 0) this.pages = UTIF.decode(buffer);
+        return this.pages.length;
+    }
+
+    async loadPageThumbnail(pageNumber: number, maxWidth: number) {
+        const full = this.renderPage(await this.getPage(pageNumber));
+        const scale = Math.min(1, (maxWidth * (window.devicePixelRatio || 1)) / full.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(full.width * scale);
+        canvas.height = Math.ceil(full.height * scale);
+        canvas.getContext("2d")!.drawImage(full, 0, 0, canvas.width, canvas.height);
+        return URL.createObjectURL(await loadCanvasToBlob(canvas));
+    }
+
+    async loadDocumentPage(pageNumber: number) {
+        const page = await this.getPage(pageNumber);
 
         const canvas = this.renderPage(page);
         const blob = await loadCanvasToBlob(canvas);

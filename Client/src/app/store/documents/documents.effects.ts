@@ -3,37 +3,15 @@ import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { Store } from "@ngrx/store";
 import { from, of } from "rxjs";
 import { switchMap, map, catchError, withLatestFrom } from "rxjs/operators";
-import { DocumentLoaderFactory, IDocumentLoader } from "../../utils/document-loader";
-import { IRawDocument } from "./documents.types";
+import { getDocumentLoader as getLoader } from "../../utils/document-loader/loader-cache";
 import * as DocumentsActions from "./documents.actions";
 import { selectCurrentDocument } from "./documents.selectors";
 
-const documentLoaders = new Map<string, IDocumentLoader>();
-
-const getLoader = async (document: IRawDocument): Promise<IDocumentLoader> => {
-    let loader = documentLoaders.get(document.url);
-    if (!loader) {
-        loader = await DocumentLoaderFactory.makeLoader(document);
-        documentLoaders.set(document.url, loader);
-    }
-    return loader;
-};
-
 @Injectable()
 export class DocumentsEffects {
-    addDocuments$ = createEffect(() =>
-        this.actions$.pipe(
-            ofType(DocumentsActions.addDocuments),
-            switchMap(({ documents }) => {
-                return from(
-                    Promise.all(documents.map(async (doc) => (await getLoader(doc)).loadDocumentMeta()))
-                ).pipe(
-                    map((loadedDocs) => DocumentsActions.addDocumentsSuccess({ documents: loadedDocs })),
-                    catchError(() => of({ type: "[Documents] Add Documents Error" }))
-                );
-            })
-        )
-    );
+    // Documents are no longer downloaded when they are listed: with a large folder that
+    // meant fetching and rendering every file up front. A document is loaded only when it
+    // is opened (setCurrentDocument$), which is also when its page count becomes known.
 
     setCurrentDocument$ = createEffect(() =>
         this.actions$.pipe(
@@ -42,8 +20,10 @@ export class DocumentsEffects {
                 return from(
                     (async () => {
                         const loader = await getLoader(document);
-                        const documentPage = await loader.loadDocumentPage(document.currentPage);
-                        return { document, documentPage };
+                        const numPages = await loader.loadPageCount();
+                        const currentPage = Math.min(Math.max(document.currentPage || 1, 1), numPages);
+                        const documentPage = await loader.loadDocumentPage(currentPage);
+                        return { document: { ...document, numPages, currentPage }, documentPage };
                     })()
                 ).pipe(
                     map(({ document, documentPage }) =>

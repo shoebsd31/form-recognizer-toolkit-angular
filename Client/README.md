@@ -61,7 +61,7 @@ src/app/
   consts/                    # Colors and application constants
   containers/                # Smart (connected) components
     custom-model-label-page/ # Main page orchestrator
-    document-gallery/        # Document list sidebar
+    document-gallery/        # Sidebar: document picker + page thumbnails
     label-canvas/            # Canvas area with map + layer services
     label-pane/              # Field editor + label assignment
     inline-label-menu/       # Quick-label popup on feature select
@@ -127,7 +127,7 @@ Document images, OCR results (`.ocr.json`), labels (`.labels.json`), and field d
 ## Key Workflows
 
 ### Document Labeling
-1. Select a document from the gallery sidebar
+1. Select a document with the picker at the top of the sidebar (previous/next or the filterable list); the page thumbnails below jump between pages
 2. OCR text boxes render as interactive features on the canvas
 3. Click/drag to select text regions
 4. Assign selected text to fields via the inline label menu or label pane
