@@ -4,8 +4,9 @@ export const constants = {
         labelSplitPaneSize: [80, 20],
         labelTableSplitPaneSize: [65, 35],
     },
-    dynamicTableImgSrc: "assets/images/customModels/dynamic-table.png",
-    fixedTableImgSrc: "assets/images/customModels/fixed-table.png",
+    // resolved next to the bundle (not the host page), so the images load wherever the files are served
+    dynamicTableImgSrc: new URL("assets/images/customModels/dynamic-table.png", import.meta.url).href,
+    fixedTableImgSrc: new URL("assets/images/customModels/fixed-table.png", import.meta.url).href,
     fieldsSchema: "https://schema.cognitiveservices.azure.com/formrecognizer/2021-03-01/fields.json",
     // Legacy Form Recognizer labels schema (kept only for reference / tolerant reads).
     labelsSchema: "https://schema.cognitiveservices.azure.com/formrecognizer/2021-03-01/labels.json",

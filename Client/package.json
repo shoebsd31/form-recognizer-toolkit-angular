@@ -11,7 +11,11 @@
     "package:prepare": "node scripts/prepare-package.js",
     "package:build": "npm run build:element && npm run package:prepare",
     "package:publish": "npm run package:build && cd dist/npm-package && npm publish --access public",
-    "package:publish:dry": "npm run package:build && cd dist/npm-package && npm publish --access public --dry-run"
+    "package:publish:dry": "npm run package:build && cd dist/npm-package && npm publish --access public --dry-run",
+    "package:cu:build": "npm run build:element && node scripts/prepare-package.js packages/content-understanding-labeling dist/content-understanding-labeling",
+    "package:cu:pack": "npm run package:cu:build && cd dist/content-understanding-labeling && npm pack",
+    "package:cu:publish": "npm run package:cu:build && cd dist/content-understanding-labeling && npm publish --access public",
+    "package:cu:publish:dry": "npm run package:cu:build && cd dist/content-understanding-labeling && npm publish --access public --dry-run"
   },
   "private": true,
   "dependencies": {
