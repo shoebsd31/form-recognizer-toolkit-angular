@@ -411,39 +411,29 @@ export class CustomModelLabelPageComponent implements OnInit, OnDestroy {
 
       this.showEmptyFolderMessage = documents.length === 0;
 
-      if (!this.showEmptyFolderMessage) {
-        const chunkSize = 3;
-        for (let i = 0, j = documents.length; i < j; i += chunkSize) {
-          const documentChunk = documents.slice(i, i + chunkSize);
-          if (this.mounted) {
-            this.store.dispatch(addDocuments({ documents: documentChunk }));
-            // Allow some time for document processing
-            await new Promise((resolve) => setTimeout(resolve, 50));
-
-            documentChunk.forEach((document) => {
-              const { name } = document;
-              const ocrFileName = `${name}${constants.ocrFileExtension}`;
-              const labelFileName = `${name}${constants.labelFileExtension}`;
-
-              if (filePaths.includes(ocrFileName)) {
-                this.store.dispatch(
-                  setDocumentAnalyzingStatus({
-                    name,
-                    status: DocumentStatus.Analyzed,
-                  })
-                );
-              }
-              if (filePaths.includes(labelFileName)) {
-                this.store.dispatch(
-                  setDocumentLabelingStatus({
-                    name,
-                    status: DocumentStatus.Labeled,
-                  })
-                );
-              }
-            });
+      if (!this.showEmptyFolderMessage && this.mounted) {
+        // Listing is cheap now: documents are only downloaded when opened, so add
+        // them all at once and set the statuses from the file list.
+        const files = new Set(filePaths);
+        this.store.dispatch(addDocuments({ documents }));
+        documents.forEach(({ name }) => {
+          if (files.has(`${name}${constants.ocrFileExtension}`)) {
+            this.store.dispatch(
+              setDocumentAnalyzingStatus({
+                name,
+                status: DocumentStatus.Analyzed,
+              })
+            );
           }
-        }
+          if (files.has(`${name}${constants.labelFileExtension}`)) {
+            this.store.dispatch(
+              setDocumentLabelingStatus({
+                name,
+                status: DocumentStatus.Labeled,
+              })
+            );
+          }
+        });
       }
     } catch (err) {
       this.errorMessage = err as IStorageProviderError;

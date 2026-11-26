@@ -27,7 +27,7 @@ export class PdfLoader implements IDocumentLoader {
     }
 
     async loadDocumentMeta() {
-        this.pdf = await pdfjsLib.getDocument(this.url).promise;
+        await this.getPdf();
         const page = await this.pdf.getPage(1);
         const viewport = page.getViewport({ scale: 1 });
         const canvas = document.createElement("canvas");
@@ -49,10 +49,36 @@ export class PdfLoader implements IDocumentLoader {
         };
     }
 
-    async loadDocumentPage(pageNumber: number) {
-        if (!this.pdf) {
-            this.pdf = await pdfjsLib.getDocument(this.url).promise;
+    private pdfPromise?: Promise<any>;
+
+    private async getPdf() {
+        if (this.pdf) return this.pdf;
+        if (!this.pdfPromise) {
+            this.pdfPromise = pdfjsLib.getDocument(this.url).promise;
+            this.pdfPromise.catch(() => (this.pdfPromise = undefined));
         }
+        this.pdf = await this.pdfPromise;
+        return this.pdf;
+    }
+
+    async loadPageCount() {
+        return (await this.getPdf()).numPages as number;
+    }
+
+    async loadPageThumbnail(pageNumber: number, maxWidth: number) {
+        const page = await (await this.getPdf()).getPage(pageNumber);
+        const base = page.getViewport({ scale: 1 });
+        const scale = Math.min(1, (maxWidth * (window.devicePixelRatio || 1)) / base.width);
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        await page.render({ canvasContext: canvas.getContext("2d")!, viewport }).promise;
+        return URL.createObjectURL(await loadCanvasToBlob(canvas));
+    }
+
+    async loadDocumentPage(pageNumber: number) {
+        await this.getPdf();
         const page = await this.pdf.getPage(pageNumber);
         const viewport = page.getViewport({ scale: 1 });
         const canvas = document.createElement("canvas");
